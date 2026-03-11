@@ -1,0 +1,40 @@
+import { skellyPreset, skellyThemeConfig, defaultLocales } from '@freemocap/skellydocs';
+import type { Config } from '@docusaurus/types';
+
+const config: Config = {
+  title: '{{projectName}}',
+  tagline: '{{projectName}} documentation',
+  favicon: 'img/favicon.ico',
+
+  future: { v4: true },
+
+  url: 'https://freemocap.github.io',
+  baseUrl: '{{baseUrl}}',
+
+  organizationName: '{{repo}}'.split('/')[0],
+  projectName: '{{repo}}'.split('/')[1],
+
+  onBrokenLinks: 'throw',
+
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ['@docusaurus/theme-mermaid'],
+
+  i18n: defaultLocales(),
+
+  presets: [
+    skellyPreset({
+      repo: '{{repo}}',
+      accentColor: '{{accentColor}}',
+    }),
+  ],
+
+  themeConfig: skellyThemeConfig({
+    title: '{{projectName}}',
+    repo: '{{repo}}',
+  }),
+};
+
+export default config;

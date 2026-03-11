@@ -1,0 +1,65 @@
+{
+  "name": "@freemocap/skellydocs",
+  "version": "0.1.0",
+  "description": "Shared Docusaurus theme, preset, and CLI for FreeMoCap documentation sites",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/freemocap/skellydocs.git"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./preset": {
+      "types": "./dist/preset.d.ts",
+      "default": "./dist/preset.js"
+    },
+    "./css/custom.css": "./src/css/custom.css",
+    "./css/theme.module.css": "./src/css/theme.module.css"
+  },
+  "bin": {
+    "skellydocs": "./dist/bin/create-skellydocs.js"
+  },
+  "files": [
+    "dist",
+    "src/css",
+    "src/theme",
+    "static",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "release": "release-it"
+  },
+  "dependencies": {
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/theme-mermaid": "^3.9.2",
+    "handlebars": "^4.7.8",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "^3.9.2",
+    "@docusaurus/types": "^3.9.2",
+    "@types/prompts": "^2.4.9",
+    "release-it": "^19.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.6.2"
+  },
+  "peerDependencies": {
+    "@docusaurus/core": "^3.0.0",
+    "@mdx-js/react": "^3.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}
