@@ -5,7 +5,7 @@ export default defineConfig([
   // relative imports like `../css/theme.module.css` stay correct in the output.
   // Docusaurus's webpack resolves the CSS module imports at site build time.
   {
-    entry: ["src/**/*.ts", "src/**/*.tsx", "!src/bin/**"],
+    entry: ["src/**/*.ts", "src/**/*.tsx", "!src/bin/**", "!src/**/*.d.ts"],
     format: ["esm"],
     dts: true,
     bundle: false,
