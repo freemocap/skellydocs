@@ -33,7 +33,7 @@
     "templates"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/copy-css.mjs",
     "dev": "tsup --watch",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
@@ -61,5 +61,8 @@
   },
   "engines": {
     "node": ">=20.0"
-  }
+  },
+  "workspaces": [
+    "docs-site"
+  ]
 }
