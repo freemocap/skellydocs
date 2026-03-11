@@ -132,3 +132,9 @@ export function skellyThemeConfig(options: {
 }
 
 export default skellyPreset;
+
+// Re-export config helpers so docusaurus.config.ts can import everything
+// from '@freemocap/skellydocs/preset' without pulling in theme components
+// (which import CSS that crashes jiti at config-load time).
+export { defaultLocales } from "./locales.js";
+export type { SkellyPresetOptions } from "./types.js";

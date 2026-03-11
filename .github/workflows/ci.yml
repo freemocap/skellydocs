@@ -18,3 +18,6 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
+
+      # Build the docs site to catch theme breakage early
+      - run: npm run build --workspace=docs-site
