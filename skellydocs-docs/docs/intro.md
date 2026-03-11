@@ -1,0 +1,12 @@
+---
+sidebar_position: 1
+title: Introduction
+---
+
+# Welcome to skellydocs
+
+This documentation site is built with [Docusaurus](https://docusaurus.io/) and the [@freemocap/skellydocs](https://github.com/freemocap/skellydocs) theme.
+
+## Getting Started
+
+Edit this file at `docs/intro.md` to start writing your documentation.

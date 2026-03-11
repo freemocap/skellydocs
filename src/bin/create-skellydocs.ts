@@ -5,52 +5,69 @@ import Handlebars from "handlebars";
 import prompts from "prompts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = path.resolve(__dirname, "..", "templates");
 
-type Answers = {
-  projectName: string;
-  repo: string;
-  baseUrl: string;
-  targetDir: string;
+// From dist/bin/ we need to go up two levels to reach the package root where templates/ lives
+const TEMPLATES_DIR = path.resolve(__dirname, "..", "..", "templates");
+
+const PROMPTS_CANCEL = {
+  onCancel: () => {
+    throw new Error("Aborted");
+  },
 };
 
-async function promptUser(): Promise<Answers> {
-  const response = await prompts(
-    [
-      {
-        type: "text",
-        name: "projectName",
-        message: "Project name (e.g. SkellyCam)",
-        validate: (v: string) => v.length > 0 || "Required",
-      },
-      {
-        type: "text",
-        name: "repo",
-        message: "GitHub repo (e.g. freemocap/skellycam)",
-        validate: (v: string) =>
-          v.includes("/") || "Must be in org/repo format",
-      },
-      {
-        type: "text",
-        name: "baseUrl",
-        message: "Base URL path (e.g. /skellycam/)",
-        initial: "/",
-      },
-      {
-        type: "text",
-        name: "targetDir",
-        message: "Target directory",
-        initial: "./docs-site",
-      },
-    ],
+/** Extracts the last non-empty path segment from a URL or bare string */
+function extractProjectName(repoUrl: string): string {
+  const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
+  const segments = trimmed.split("/").filter(Boolean);
+  const last = segments.at(-1);
+  if (!last) {
+    throw new Error(`Could not extract project name from "${repoUrl}"`);
+  }
+  return last;
+}
+
+/** Extracts "org/repo" from a URL like https://github.com/org/repo, or returns "" if not possible */
+function extractOrgRepo(repoUrl: string): string {
+  const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
+  const segments = trimmed.split("/").filter(Boolean);
+  if (segments.length >= 2) {
+    return `${segments.at(-2)}/${segments.at(-1)}`;
+  }
+  return "";
+}
+
+async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
+  const { repoUrl } = await prompts(
     {
-      onCancel: () => {
-        throw new Error("Aborted");
+      type: "text",
+      name: "repoUrl",
+      message: "Repo URL (e.g. https://github.com/freemocap/skellycam)",
+      validate: (v: string) => {
+        try {
+          extractProjectName(v);
+          return true;
+        } catch (e) {
+          return (e as Error).message;
+        }
       },
     },
+    PROMPTS_CANCEL,
   );
 
-  return response as Answers;
+  const defaultName = extractProjectName(repoUrl as string);
+
+  const { projectName } = await prompts(
+    {
+      type: "text",
+      name: "projectName",
+      message: `Project name?`,
+      initial: defaultName,
+      validate: (v: string) => v.trim().length > 0 || "Required",
+    },
+    PROMPTS_CANCEL,
+  );
+
+  return { repoUrl: (repoUrl as string).trim(), projectName: (projectName as string).trim() };
 }
 
 function renderTemplate(templateName: string, data: Record<string, string>): string {
@@ -91,16 +108,17 @@ async function main(): Promise<void> {
 async function runInit(): Promise<void> {
   console.log("\n🦴 skellydocs — scaffold a new docs site\n");
 
-  const answers = await promptUser();
-  const targetDir = path.resolve(answers.targetDir);
+  const { repoUrl, projectName } = await promptUser();
+  const repo = extractOrgRepo(repoUrl);
+  const targetDir = path.resolve(`./${projectName}-docs`);
 
   console.log(`\nScaffolding into ${targetDir}...\n`);
 
-  const templateData = {
-    projectName: answers.projectName,
-    repo: answers.repo,
-    baseUrl: answers.baseUrl,
-    repoName: answers.repo.split("/")[1] ?? answers.repo,
+  const templateData: Record<string, string> = {
+    projectName: projectName,
+    repo: repo,
+    repoUrl: repoUrl,
+    baseUrl: `/${projectName}/`,
   };
 
   writeFile(
@@ -128,21 +146,20 @@ async function runInit(): Promise<void> {
     renderTemplate("docs/intro.md.hbs", templateData),
   );
 
-  // Thin page wrappers
   const pagesDir = path.join(targetDir, "src", "pages");
 
   writeFile(
     path.join(pagesDir, "index.tsx"),
-    `import { IndexPage } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${answers.repo}';\n\nexport default function Home() {\n  return <IndexPage config={config} repo={REPO} />;\n}\n`,
+    `import { IndexPage } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${repo}';\n\nexport default function Home() {\n  return <IndexPage config={config} repo={REPO} />;\n}\n`,
   );
 
   writeFile(
     path.join(pagesDir, "roadmap.tsx"),
-    `import { RoadmapPage } from '@freemocap/skellydocs';\n\nconst REPO = '${answers.repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} />;\n}\n`,
+    `import { RoadmapPage } from '@freemocap/skellydocs';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} />;\n}\n`,
   );
 
   console.log("\n✅ Done! Next steps:\n");
-  console.log(`  cd ${answers.targetDir}`);
+  console.log(`  cd ${projectName}-docs`);
   console.log("  npm install");
   console.log("  npm start\n");
 }
