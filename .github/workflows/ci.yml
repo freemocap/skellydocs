@@ -20,4 +20,4 @@ jobs:
       - run: npm run build
 
       # Build the docs site to catch theme breakage early
-      - run: npm run build --workspace=docs-site
+      - run: npm run build --workspace=skellydocs-docs

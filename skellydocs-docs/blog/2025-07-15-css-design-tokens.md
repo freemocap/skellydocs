@@ -1,0 +1,32 @@
+---
+slug: css-design-tokens
+title: Customizing your site with CSS design tokens
+authors: [freemocap]
+tags: [tutorial, css, theming]
+date: 2025-07-15T10:00:00
+---
+
+skellydocs uses CSS custom properties (design tokens) to keep styling consistent and customizable. Here's how to make your docs site feel like *your* project.
+
+<!-- truncate -->
+
+## The `--sk-accent` variable
+
+The single most impactful change you can make is overriding the accent color. Every button highlight, link underline, and badge tint uses `--sk-accent`:
+
+```css
+:root {
+  --sk-accent: #f472b6;  /* pink */
+  --sk-accent-dim: rgba(244, 114, 182, 0.15);
+}
+```
+
+That's two lines of CSS to completely rebrand your docs site.
+
+## All available tokens
+
+Check out the [CSS Tokens reference](/docs/reference/css-tokens) for the full list of `--sk-*` variables you can override.
+
+## Dark mode by default
+
+skellydocs ships with a dark theme that respects `prefers-color-scheme`. Your users get the right theme automatically.

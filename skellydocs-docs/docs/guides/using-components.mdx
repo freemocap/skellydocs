@@ -1,0 +1,62 @@
+---
+sidebar_position: 2
+title: Using Components
+---
+
+# Using skellydocs components
+
+skellydocs provides a set of React components you can use in your pages and MDX docs.
+
+## Available components
+
+| Component | What it does |
+|---|---|
+| `IndexPage` | Full landing page with hero, feature cards, and guarantees |
+| `RoadmapPage` | Fetches GitHub issues and renders a filterable roadmap |
+| `CoreFeatureHeader` | Summary block for the top of feature doc pages |
+| `TodoList` | Collapsible list linking items to GitHub issues |
+| `Tip` | Inline tooltip — hover to reveal an explanation |
+| `AiGeneratedBanner` | Disclaimer banner for AI-drafted pages |
+
+## Using components in pages
+
+The landing page and roadmap are thin wrappers:
+
+```tsx title="src/pages/index.tsx"
+import { IndexPage } from '@freemocap/skellydocs';
+import config from '../../content.config';
+
+export default function Home() {
+  return <IndexPage config={config} repo="your-org/your-repo" />;
+}
+```
+
+```tsx title="src/pages/roadmap.tsx"
+import { RoadmapPage } from '@freemocap/skellydocs';
+
+export default function Roadmap() {
+  return <RoadmapPage repo="your-org/your-repo" />;
+}
+```
+
+## Using components in MDX
+
+You can import components directly in your markdown files:
+
+```mdx
+---
+title: My Feature
+---
+
+import { Tip, AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
+This feature uses a
+<Tip text="A technique where data is processed in small chunks rather than all at once">
+  streaming pipeline
+</Tip>
+for efficient processing.
+```
+
+The `Tip` component renders as underlined text — hover over it to see the explanation.
