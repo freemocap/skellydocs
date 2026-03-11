@@ -1,170 +1,99 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import Handlebars from "handlebars";
-import prompts from "prompts";
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const config: Config = {
+  title: 'skellydocs',
+  tagline: 'Documentation for skellydocs',
+  favicon: 'img/favicon.ico',
 
-// From dist/bin/ we need to go up two levels to reach the package root where templates/ lives
-const TEMPLATES_DIR = path.resolve(__dirname, "..", "..", "templates");
+  url: 'https://freemocap.github.io',
+  baseUrl: '/skellydocs/',
 
-const PROMPTS_CANCEL = {
-  onCancel: () => {
-    throw new Error("Aborted");
+  organizationName: 'freemocap',
+  projectName: 'skellydocs',
+
+  onBrokenLinks: 'throw',
+
+  markdown: { mermaid: true },
+
+  themes: ['@docusaurus/theme-mermaid'],
+
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          routeBasePath: 'docs',
+          editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
+        },
+        blog: {
+          showReadingTime: true,
+          feedOptions: { type: ['rss', 'atom'], xslt: true },
+          editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
+          onInlineTags: 'warn',
+          onInlineAuthors: 'warn',
+          onUntruncatedBlogPosts: 'warn',
+        },
+        theme: {
+          customCss: [require.resolve('@freemocap/skellydocs/css/custom.css')],
+        },
+      },
+    ],
+  ],
+
+  themeConfig: {
+    image: 'img/og-image.png',
+    colorMode: {
+      defaultMode: 'dark',
+      respectPrefersColorScheme: true,
+    },
+    navbar: {
+      title: 'skellydocs',
+      logo: {
+        alt: 'skellydocs Logo',
+        src: 'img/logo.svg',
+      },
+      items: [
+        { type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Docs' },
+        { to: '/blog', label: 'Blog', position: 'left' },
+        { to: '/roadmap', label: 'Roadmap', position: 'left' },
+        { href: 'https://github.com/freemocap/skellydocs', label: 'GitHub', position: 'right' },
+      ],
+    },
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Documentation',
+          items: [{ label: 'Getting Started', to: '/docs/' }],
+        },
+        {
+          title: 'Community',
+          items: [
+            { label: 'Discord', href: 'https://discord.gg/freemocap' },
+            { label: 'GitHub Discussions', href: 'https://github.com/freemocap/skellydocs/discussions' },
+            { label: 'FreeMoCap', href: 'https://freemocap.org' },
+          ],
+        },
+        {
+          title: 'More',
+          items: [
+            { label: 'Blog', to: '/blog' },
+            { label: 'GitHub', href: 'https://github.com/freemocap/skellydocs' },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} FreeMoCap Foundation. Built with Docusaurus.`,
+    },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+      additionalLanguages: ['bash', 'json', 'python', 'typescript'],
+    },
+    mermaid: {
+      theme: { light: 'neutral', dark: 'dark' },
+    },
   },
 };
 
-/** Extracts the last non-empty path segment from a URL or bare string */
-function extractProjectName(repoUrl: string): string {
-  const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
-  const segments = trimmed.split("/").filter(Boolean);
-  const last = segments.at(-1);
-  if (!last) {
-    throw new Error(`Could not extract project name from "${repoUrl}"`);
-  }
-  return last;
-}
-
-/** Extracts "org/repo" from a URL like https://github.com/org/repo, or returns "" if not possible */
-function extractOrgRepo(repoUrl: string): string {
-  const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
-  const segments = trimmed.split("/").filter(Boolean);
-  if (segments.length >= 2) {
-    return `${segments.at(-2)}/${segments.at(-1)}`;
-  }
-  return "";
-}
-
-async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
-  const { repoUrl } = await prompts(
-    {
-      type: "text",
-      name: "repoUrl",
-      message: "Repo URL (e.g. https://github.com/freemocap/skellycam)",
-      validate: (v: string) => {
-        try {
-          extractProjectName(v);
-          return true;
-        } catch (e) {
-          return (e as Error).message;
-        }
-      },
-    },
-    PROMPTS_CANCEL,
-  );
-
-  const defaultName = extractProjectName(repoUrl as string);
-
-  const { projectName } = await prompts(
-    {
-      type: "text",
-      name: "projectName",
-      message: `Project name?`,
-      initial: defaultName,
-      validate: (v: string) => v.trim().length > 0 || "Required",
-    },
-    PROMPTS_CANCEL,
-  );
-
-  return { repoUrl: (repoUrl as string).trim(), projectName: (projectName as string).trim() };
-}
-
-function renderTemplate(templateName: string, data: Record<string, string>): string {
-  const templatePath = path.join(TEMPLATES_DIR, templateName);
-  if (!fs.existsSync(templatePath)) {
-    throw new Error(`Template not found: ${templatePath}`);
-  }
-  const source = fs.readFileSync(templatePath, "utf-8");
-  const template = Handlebars.compile(source);
-  return template(data);
-}
-
-function writeFile(filePath: string, content: string): void {
-  const dir = path.dirname(filePath);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(filePath, content, "utf-8");
-  console.log(`  created ${filePath}`);
-}
-
-async function main(): Promise<void> {
-  const command = process.argv[2];
-
-  if (command === "init" || !command) {
-    await runInit();
-  } else if (command === "translate") {
-    console.log(
-      "Translation support is not yet implemented. Coming in a future release.",
-    );
-    process.exit(1);
-  } else {
-    console.error(`Unknown command: ${command}`);
-    console.error("Usage: skellydocs init");
-    console.error("       skellydocs translate --locale <locale>");
-    process.exit(1);
-  }
-}
-
-async function runInit(): Promise<void> {
-  console.log("\n🦴 skellydocs — scaffold a new docs site\n");
-
-  const { repoUrl, projectName } = await promptUser();
-  const repo = extractOrgRepo(repoUrl);
-  const targetDir = path.resolve(`./${projectName}-docs`);
-
-  console.log(`\nScaffolding into ${targetDir}...\n`);
-
-  const templateData: Record<string, string> = {
-    projectName: projectName,
-    repo: repo,
-    repoUrl: repoUrl,
-    baseUrl: `/${projectName}/`,
-  };
-
-  writeFile(
-    path.join(targetDir, "package.json"),
-    renderTemplate("package.json.hbs", templateData),
-  );
-
-  writeFile(
-    path.join(targetDir, "docusaurus.config.ts"),
-    renderTemplate("docusaurus.config.ts.hbs", templateData),
-  );
-
-  writeFile(
-    path.join(targetDir, "content.config.tsx"),
-    renderTemplate("content.config.tsx.hbs", templateData),
-  );
-
-  writeFile(
-    path.join(targetDir, "sidebars.ts"),
-    `import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';\n\nconst sidebars: SidebarsConfig = {\n  docsSidebar: [{type: 'autogenerated', dirName: '.'}],\n};\n\nexport default sidebars;\n`,
-  );
-
-  writeFile(
-    path.join(targetDir, "docs", "intro.md"),
-    renderTemplate("docs/intro.md.hbs", templateData),
-  );
-
-  const pagesDir = path.join(targetDir, "src", "pages");
-
-  writeFile(
-    path.join(pagesDir, "index.tsx"),
-    `import { IndexPage } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${repo}';\n\nexport default function Home() {\n  return <IndexPage config={config} repo={REPO} />;\n}\n`,
-  );
-
-  writeFile(
-    path.join(pagesDir, "roadmap.tsx"),
-    `import { RoadmapPage } from '@freemocap/skellydocs';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} />;\n}\n`,
-  );
-
-  console.log("\n✅ Done! Next steps:\n");
-  console.log(`  cd ${projectName}-docs`);
-  console.log("  npm install");
-  console.log("  npm start\n");
-}
-
-main().catch((err: Error) => {
-  console.error(err.message);
-  process.exit(1);
-});
+export default config;

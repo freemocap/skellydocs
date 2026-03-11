@@ -26,12 +26,12 @@ function extractProjectName(repoUrl: string): string {
   return last;
 }
 
-/** Extracts "org/repo" from a URL like https://github.com/org/repo, or returns "" if not possible */
-function extractOrgRepo(repoUrl: string): string {
+/** Extracts the second-to-last path segment as the org/owner name */
+function extractOrgName(repoUrl: string): string {
   const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
   const segments = trimmed.split("/").filter(Boolean);
   if (segments.length >= 2) {
-    return `${segments.at(-2)}/${segments.at(-1)}`;
+    return segments.at(-2)!;
   }
   return "";
 }
@@ -60,7 +60,7 @@ async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
     {
       type: "text",
       name: "projectName",
-      message: `Project name?`,
+      message: "Project name?",
       initial: defaultName,
       validate: (v: string) => v.trim().length > 0 || "Required",
     },
@@ -92,15 +92,9 @@ async function main(): Promise<void> {
 
   if (command === "init" || !command) {
     await runInit();
-  } else if (command === "translate") {
-    console.log(
-      "Translation support is not yet implemented. Coming in a future release.",
-    );
-    process.exit(1);
   } else {
     console.error(`Unknown command: ${command}`);
     console.error("Usage: skellydocs init");
-    console.error("       skellydocs translate --locale <locale>");
     process.exit(1);
   }
 }
@@ -109,13 +103,15 @@ async function runInit(): Promise<void> {
   console.log("\n🦴 skellydocs — scaffold a new docs site\n");
 
   const { repoUrl, projectName } = await promptUser();
-  const repo = extractOrgRepo(repoUrl);
+  const orgName = extractOrgName(repoUrl);
+  const repo = orgName ? `${orgName}/${projectName}` : projectName;
   const targetDir = path.resolve(`./${projectName}-docs`);
 
   console.log(`\nScaffolding into ${targetDir}...\n`);
 
   const templateData: Record<string, string> = {
     projectName: projectName,
+    orgName: orgName,
     repo: repo,
     repoUrl: repoUrl,
     baseUrl: `/${projectName}/`,
