@@ -63,9 +63,3 @@ export type SkellyDocsConfig = {
   guarantees: string[];
   guaranteeTodos: TodoItem[];
 };
-
-// ── Preset options ──
-
-export type SkellyPresetOptions = {
-  repo: string;
-};

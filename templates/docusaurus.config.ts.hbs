@@ -1,5 +1,4 @@
 import { themes as prismThemes } from 'prism-react-renderer';
-import { skellyPreset, skellyThemeConfig, defaultLocales } from '@freemocap/skellydocs/preset';
 import type { Config } from '@docusaurus/types';
 
 const config: Config = {
@@ -12,7 +11,7 @@ const config: Config = {
   url: 'https://freemocap.github.io',
   baseUrl: '{{baseUrl}}',
 
-  organizationName: 'freemocap',
+  organizationName: '{{repo}}'.split('/')[0],
   projectName: '{{repoName}}',
 
   onBrokenLinks: 'throw',
@@ -21,22 +20,93 @@ const config: Config = {
 
   themes: ['@docusaurus/theme-mermaid'],
 
-  i18n: defaultLocales(),
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'es', 'ar', 'zh-CN'],
+    localeConfigs: {
+      es: { label: 'Español', htmlLang: 'es', path: 'es-spanish' },
+      ar: { label: 'العربية', htmlLang: 'ar', direction: 'rtl', path: 'ar-arabic' },
+      'zh-CN': { label: '简体中文', htmlLang: 'zh-CN', path: 'zh-chinese' },
+    },
+  },
 
   presets: [
-    skellyPreset({
-      repo: '{{repo}}',
-    }),
+    [
+      'classic',
+      {
+        docs: {
+          routeBasePath: 'docs',
+          editUrl: '{{repoUrl}}/tree/main/{{repoName}}-docs/',
+        },
+        blog: {
+          showReadingTime: true,
+          feedOptions: { type: ['rss', 'atom'], xslt: true },
+          editUrl: '{{repoUrl}}/tree/main/{{repoName}}-docs/',
+          onInlineTags: 'warn',
+          onInlineAuthors: 'warn',
+          onUntruncatedBlogPosts: 'warn',
+        },
+        theme: {
+          customCss: [require.resolve('@freemocap/skellydocs/css/custom.css')],
+        },
+      },
+    ],
   ],
 
-  themeConfig: skellyThemeConfig({
-    title: '{{projectName}}',
-    repo: '{{repo}}',
-    prismThemes: {
-      light: prismThemes.github,
-      dark: prismThemes.dracula,
+  themeConfig: {
+    image: 'img/og-image.png',
+    colorMode: {
+      defaultMode: 'dark',
+      respectPrefersColorScheme: true,
     },
-  }),
+    navbar: {
+      title: '{{projectName}}',
+      logo: {
+        alt: '{{projectName}} Logo',
+        src: 'img/logo.svg',
+      },
+      items: [
+        { type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Docs' },
+        { to: '/blog', label: 'Blog', position: 'left' },
+        { to: '/roadmap', label: 'Roadmap', position: 'left' },
+        { href: '{{repoUrl}}', label: 'GitHub', position: 'right' },
+        { type: 'localeDropdown', position: 'right' },
+      ],
+    },
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Documentation',
+          items: [{ label: 'Getting Started', to: '/docs/' }],
+        },
+        {
+          title: 'Community',
+          items: [
+            { label: 'Discord', href: 'https://discord.gg/freemocap' },
+            { label: 'GitHub Discussions', href: '{{repoUrl}}/discussions' },
+            { label: 'FreeMoCap', href: 'https://freemocap.org' },
+          ],
+        },
+        {
+          title: 'More',
+          items: [
+            { label: 'Blog', to: '/blog' },
+            { label: 'GitHub', href: '{{repoUrl}}' },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} FreeMoCap Foundation. Built with Docusaurus.`,
+    },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+      additionalLanguages: ['bash', 'json', 'python', 'typescript'],
+    },
+    mermaid: {
+      theme: { light: 'neutral', dark: 'dark' },
+    },
+  },
 };
 
 export default config;

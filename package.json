@@ -15,10 +15,6 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./preset": {
-      "types": "./dist/preset.d.ts",
-      "default": "./dist/preset.js"
-    },
     "./css/custom.css": "./src/css/custom.css",
     "./css/theme.module.css": "./src/css/theme.module.css"
   },
@@ -64,6 +60,6 @@
     "node": ">=20.0"
   },
   "workspaces": [
-    "docs-site"
+    "skellydocs-docs"
   ]
 }
