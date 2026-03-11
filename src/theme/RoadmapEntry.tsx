@@ -1,5 +1,5 @@
 import type React from "react";
-import type { RoadmapItem } from "../types";
+import type { RoadmapItem } from "../types.js";
 import styles from "../css/theme.module.css";
 
 function TypeIcon({ type }: { type: RoadmapItem["type"] }) {

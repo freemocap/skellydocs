@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
-import TodoList from "./TodoList";
+import TodoList from "./TodoList.js";
 import styles from "../css/theme.module.css";
-import type { SkellyDocsConfig } from "../types";
+import type { SkellyDocsConfig } from "../types.js";
 
 function HeroSection({
   config,

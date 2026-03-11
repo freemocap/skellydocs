@@ -7,8 +7,8 @@ import type {
   ItemType,
   RoadmapItem,
   SortKey,
-} from "../types";
-import RoadmapEntry from "./RoadmapEntry";
+} from "../types.js";
+import RoadmapEntry from "./RoadmapEntry.js";
 
 // ── Cache types ──
 

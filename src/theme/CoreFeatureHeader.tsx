@@ -1,5 +1,5 @@
-import type { CoreFeature } from "../types";
-import TodoList from "./TodoList";
+import type { CoreFeature } from "../types.js";
+import TodoList from "./TodoList.js";
 import styles from "../css/theme.module.css";
 
 /**

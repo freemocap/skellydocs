@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Layout from "@theme/Layout";
-import RoadmapContent from "./RoadmapContent";
+import RoadmapContent from "./RoadmapContent.js";
 import styles from "../css/theme.module.css";
 
 /**

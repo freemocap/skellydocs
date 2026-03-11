@@ -1,6 +1,6 @@
 import { type MouseEvent, useState } from "react";
 import styles from "../css/theme.module.css";
-import type { TodoItem } from "../types";
+import type { TodoItem } from "../types.js";
 
 /**
  * Collapsible "Roadmap" section that links each item to a GitHub issue.
