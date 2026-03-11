@@ -18,6 +18,24 @@ const config: Config = {
 
   themes: ['@docusaurus/theme-mermaid'],
 
+  plugins: [
+    // webpack 5 enforces full file extensions on imports from ESM packages.
+    // tsup/esbuild strips .js extensions in unbundled output, so we relax
+    // that strictness here.
+    function disableFullySpecified() {
+      return {
+        name: 'disable-fully-specified',
+        configureWebpack() {
+          return {
+            module: {
+              rules: [{ test: /\.m?js$/, resolve: { fullySpecified: false } }],
+            },
+          };
+        },
+      };
+    },
+  ],
+
   presets: [
     [
       'classic',
