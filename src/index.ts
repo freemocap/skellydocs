@@ -13,8 +13,7 @@ export type {
 } from "./types";
 
 // ── Preset and config helpers ──
-export { skellyPreset, skellyThemeConfig } from "./preset";
-export { defaultLocales } from "./locales";
+export { skellyPreset, skellyThemeConfig, defaultLocales } from "./preset";
 
 // ── Theme components (re-exported for use in consuming repos) ──
 export { default as Tip } from "./theme/Tip";

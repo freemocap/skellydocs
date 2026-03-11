@@ -13,7 +13,6 @@ type Answers = {
   projectName: string;
   repo: string;
   baseUrl: string;
-  accentColor: string;
   targetDir: string;
 };
 
@@ -38,12 +37,6 @@ async function promptUser(): Promise<Answers> {
         name: "baseUrl",
         message: "Base URL path (e.g. /skellycam/)",
         initial: "/",
-      },
-      {
-        type: "text",
-        name: "accentColor",
-        message: "Accent color (hex)",
-        initial: "#6ee7b7",
       },
       {
         type: "text",
@@ -109,7 +102,6 @@ async function runInit(): Promise<void> {
     projectName: answers.projectName,
     repo: answers.repo,
     baseUrl: answers.baseUrl,
-    accentColor: answers.accentColor,
     repoName: answers.repo.split("/")[1] ?? answers.repo,
   };
 

@@ -1,13 +1,8 @@
 import type { SkellyPresetOptions } from "./types";
-import { themes as prismThemes } from "prism-react-renderer";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PACKAGE_ROOT = path.resolve(__dirname, "..");
-
-// ── Locale config (inlined here so jiti can load this file without
-//    resolving cross-module ESM imports) ──
+// ── Locale config ──
 
 type LocaleConfig = {
   label: string;
@@ -38,7 +33,7 @@ const LOCALE_REGISTRY: { code: string; config: LocaleConfig }[] = [
 
 /**
  * Generates a Docusaurus i18n config with human-readable directory names.
- * Starts with 4 locales: en, es, ar, zh-CN.
+ * Includes 4 locales: en, es, ar, zh-CN.
  */
 export function defaultLocales(): {
   defaultLocale: string;
@@ -60,13 +55,16 @@ export function defaultLocales(): {
 
 /**
  * Docusaurus preset that bundles @docusaurus/preset-classic with the
- * skellydocs theme, mermaid, and sensible defaults.
+ * skellydocs theme and sensible defaults.
  */
 export function skellyPreset(
   options: SkellyPresetOptions,
 ): [string, Record<string, unknown>] {
-  const { repo, accentColor } = options;
+  const { repo } = options;
   const editUrl = `https://github.com/${repo}/tree/main/docs-site/`;
+
+  const thisDir = path.dirname(fileURLToPath(import.meta.url));
+  const packageRoot = path.resolve(thisDir, "..");
 
   return [
     "classic",
@@ -85,22 +83,29 @@ export function skellyPreset(
         onUntruncatedBlogPosts: "warn",
       },
       theme: {
-        customCss: [path.join(PACKAGE_ROOT, "src", "css", "custom.css")],
+        customCss: [path.join(packageRoot, "src", "css", "custom.css")],
       },
     },
   ];
 }
 
+// ── Theme config ──
+
 /**
  * Returns the themeConfig object for use in docusaurus.config.ts.
+ *
+ * `prismThemes` must be provided by the consumer so that this module
+ * does not import prism-react-renderer at the top level. That import
+ * breaks jiti (Docusaurus's config loader) in workspace setups.
  */
 export function skellyThemeConfig(options: {
   title: string;
   repo: string;
+  prismThemes: { light: unknown; dark: unknown };
   logoSrc?: string;
   logoAlt?: string;
 }): Record<string, unknown> {
-  const { title, repo, logoSrc = "img/logo.svg", logoAlt } = options;
+  const { title, repo, prismThemes, logoSrc = "img/logo.svg", logoAlt } = options;
 
   return {
     image: "img/og-image.png",
@@ -163,8 +168,8 @@ export function skellyThemeConfig(options: {
       copyright: `Copyright © ${new Date().getFullYear()} FreeMoCap Foundation. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismThemes.light,
+      darkTheme: prismThemes.dark,
       additionalLanguages: ["bash", "json", "python", "typescript"],
     },
     mermaid: {

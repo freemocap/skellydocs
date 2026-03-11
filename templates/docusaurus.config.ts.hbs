@@ -1,18 +1,19 @@
+import { themes as prismThemes } from 'prism-react-renderer';
 import { skellyPreset, skellyThemeConfig, defaultLocales } from '@freemocap/skellydocs/preset';
 import type { Config } from '@docusaurus/types';
 
 const config: Config = {
-  title: 'skellydocs',
-  tagline: 'Shared documentation theme for FreeMoCap projects',
+  title: '{{projectName}}',
+  tagline: 'Documentation for {{projectName}}',
   favicon: 'img/favicon.ico',
 
   future: { v4: true },
 
   url: 'https://freemocap.github.io',
-  baseUrl: '/skellydocs/',
+  baseUrl: '{{baseUrl}}',
 
   organizationName: 'freemocap',
-  projectName: 'skellydocs',
+  projectName: '{{repoName}}',
 
   onBrokenLinks: 'throw',
 
@@ -24,14 +25,17 @@ const config: Config = {
 
   presets: [
     skellyPreset({
-      repo: 'freemocap/skellydocs',
-      accentColor: '#a78bfa',
+      repo: '{{repo}}',
     }),
   ],
 
   themeConfig: skellyThemeConfig({
-    title: 'skellydocs',
-    repo: 'freemocap/skellydocs',
+    title: '{{projectName}}',
+    repo: '{{repo}}',
+    prismThemes: {
+      light: prismThemes.github,
+      dark: prismThemes.dracula,
+    },
   }),
 };
 

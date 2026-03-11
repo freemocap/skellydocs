@@ -68,6 +68,4 @@ export type SkellyDocsConfig = {
 
 export type SkellyPresetOptions = {
   repo: string;
-  roadmapLabel?: string;
-  accentColor?: string;
 };

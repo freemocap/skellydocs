@@ -21,7 +21,7 @@ Every FreeMoCap sub-project — SkellyCam, SkellyTracker, FreeMoCap core — get
 | `Tip` | Inline tooltip for progressive disclosure (hover to reveal explanation) |
 | `AiGeneratedBanner` | Disclaimer banner for AI-drafted doc pages |
 
-**CSS design tokens** — `--sk-*` CSS variables that define the palette, plus a full `theme.module.css` with styles for every component. The `accentColor` preset option overrides `--sk-accent` to give each project its own color identity.
+**CSS design tokens** — `--sk-*` CSS variables that define the palette, plus a full `theme.module.css` with styles for every component. Override `--sk-accent` in your own CSS to give each project its own color identity.
 
 **i18n helpers** — `defaultLocales()` generates Docusaurus i18n config with human-readable directory names (`i18n/es-spanish/` instead of `i18n/es/`). Starts with English, Spanish, Arabic (RTL), and Chinese.
 
@@ -35,7 +35,7 @@ Every FreeMoCap sub-project — SkellyCam, SkellyTracker, FreeMoCap core — get
 npx @freemocap/skellydocs init
 ```
 
-You'll be prompted for your project name, GitHub repo, base URL, and accent color. The CLI generates a ready-to-run docs site:
+You'll be prompted for your project name, GitHub repo, and base URL. The CLI generates a ready-to-run docs site:
 
 ```
 docs-site/
@@ -70,10 +70,11 @@ The best way to understand the package is to see how a consuming repo uses it. H
 
 ### docusaurus.config.ts
 
-The preset eliminates boilerplate. Pass your repo slug and accent color; everything else has sensible defaults.
+The preset eliminates boilerplate. The consumer imports `prism-react-renderer` directly and passes themes to `skellyThemeConfig`; everything else has sensible defaults.
 
 ```typescript
-import { skellyPreset, skellyThemeConfig, defaultLocales } from '@freemocap/skellydocs';
+import { themes as prismThemes } from 'prism-react-renderer';
+import { skellyPreset, skellyThemeConfig, defaultLocales } from '@freemocap/skellydocs/preset';
 import type { Config } from '@docusaurus/types';
 
 const config: Config = {
@@ -93,13 +94,16 @@ const config: Config = {
   presets: [
     skellyPreset({
       repo: 'freemocap/skellycam',
-      accentColor: '#6ee7b7',
     }),
   ],
 
   themeConfig: skellyThemeConfig({
     title: 'SkellyCam',
     repo: 'freemocap/skellycam',
+    prismThemes: {
+      light: prismThemes.github,
+      dark: prismThemes.dracula,
+    },
     logoSrc: 'img/skellycam-logo.svg',
   }),
 };
@@ -112,8 +116,16 @@ export default config;
 | Option | Required | Description |
 |---|---|---|
 | `repo` | yes | GitHub `org/repo` string — used for edit links, roadmap API calls, issue links |
-| `roadmapLabel` | no | GitHub label to fetch for the roadmap page (default: `"roadmap"`) |
-| `accentColor` | no | Hex color that overrides the `--sk-accent` CSS variable |
+
+`skellyThemeConfig()` takes:
+
+| Option | Required | Default | Description |
+|---|---|---|---|
+| `title` | yes | — | Displayed in the navbar |
+| `repo` | yes | — | GitHub `org/repo` — navbar GitHub link and footer links |
+| `prismThemes` | yes | — | `{ light, dark }` theme objects from `prism-react-renderer` |
+| `logoSrc` | no | `"img/logo.svg"` | Path to the navbar logo (relative to `static/`) |
+| `logoAlt` | no | `"<title> Logo"` | Alt text for the navbar logo |
 
 ### content.config.tsx
 
@@ -262,7 +274,7 @@ The theme defines `--sk-*` CSS variables in `custom.css`. All component styles r
 | `--sk-border` | `#1a1730` | Borders and dividers |
 | `--sk-text` | `#e8e6f0` | Primary text |
 | `--sk-text-dim` | `#8a87a0` | Secondary/muted text |
-| `--sk-accent` | `#6ee7b7` | Accent color (overridable via `accentColor` option) |
+| `--sk-accent` | `#6ee7b7` | Accent color (override in your CSS to customize) |
 | `--sk-accent-dim` | `rgba(110,231,183,0.15)` | Accent background tint |
 | `--sk-purple` | `#a78bfa` | Secondary accent (links, badges) |
 | `--sk-mono` | JetBrains Mono | Monospace font stack |
@@ -273,8 +285,7 @@ The theme defines `--sk-*` CSS variables in `custom.css`. All component styles r
 @freemocap/skellydocs/
 ├── src/
 │   ├── index.ts               # Package entry — re-exports everything
-│   ├── preset.ts              # skellyPreset() + skellyThemeConfig()
-│   ├── locales.ts             # defaultLocales() helper
+│   ├── preset.ts              # skellyPreset() + skellyThemeConfig() + defaultLocales()
 │   ├── types.ts               # All shared TypeScript types
 │   ├── bin/
 │   │   └── create-skellydocs.ts
@@ -290,12 +301,10 @@ The theme defines `--sk-*` CSS variables in `custom.css`. All component styles r
 │   └── css/
 │       ├── custom.css
 │       └── theme.module.css
-├── static/img/                # Default FreeMoCap assets (overridable)
 ├── templates/                 # Handlebars templates for the CLI
 ├── package.json
 ├── tsconfig.json
-├── tsup.config.ts
-└── .release-it.json
+└── tsup.config.ts
 ```
 
 ## Releasing
