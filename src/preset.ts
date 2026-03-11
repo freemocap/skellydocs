@@ -1,4 +1,3 @@
-import type { LoadContext } from "@docusaurus/types";
 import type { SkellyPresetOptions } from "./types";
 import { themes as prismThemes } from "prism-react-renderer";
 import path from "node:path";
@@ -7,25 +6,73 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = path.resolve(__dirname, "..");
 
+// ── Locale config (inlined here so jiti can load this file without
+//    resolving cross-module ESM imports) ──
+
+type LocaleConfig = {
+  label: string;
+  htmlLang: string;
+  direction?: "ltr" | "rtl";
+  path: string;
+};
+
+const LOCALE_REGISTRY: { code: string; config: LocaleConfig }[] = [
+  {
+    code: "es",
+    config: { label: "Español", htmlLang: "es", path: "es-spanish" },
+  },
+  {
+    code: "ar",
+    config: {
+      label: "العربية",
+      htmlLang: "ar",
+      direction: "rtl",
+      path: "ar-arabic",
+    },
+  },
+  {
+    code: "zh-CN",
+    config: { label: "简体中文", htmlLang: "zh-CN", path: "zh-chinese" },
+  },
+];
+
+/**
+ * Generates a Docusaurus i18n config with human-readable directory names.
+ * Starts with 4 locales: en, es, ar, zh-CN.
+ */
+export function defaultLocales(): {
+  defaultLocale: string;
+  locales: string[];
+  localeConfigs: Record<string, LocaleConfig>;
+} {
+  const localeConfigs: Record<string, LocaleConfig> = {};
+  const locales: string[] = ["en"];
+
+  for (const entry of LOCALE_REGISTRY) {
+    locales.push(entry.code);
+    localeConfigs[entry.code] = entry.config;
+  }
+
+  return { defaultLocale: "en", locales, localeConfigs };
+}
+
+// ── Preset ──
+
 /**
  * Docusaurus preset that bundles @docusaurus/preset-classic with the
  * skellydocs theme, mermaid, and sensible defaults.
- *
- * Usage in docusaurus.config.ts:
- *   import { skellyPreset } from '@freemocap/skellydocs';
- *   presets: [skellyPreset({ repo: 'freemocap/skellycam' })]
  */
 export function skellyPreset(
   options: SkellyPresetOptions,
 ): [string, Record<string, unknown>] {
-  const { repo, roadmapLabel = "roadmap", accentColor } = options;
+  const { repo, accentColor } = options;
   const editUrl = `https://github.com/${repo}/tree/main/docs-site/`;
 
   return [
     "classic",
     {
       docs: {
-        sidebarPath: undefined, // let Docusaurus auto-generate
+        sidebarPath: undefined,
         routeBasePath: "docs",
         editUrl,
       },
@@ -38,9 +85,7 @@ export function skellyPreset(
         onUntruncatedBlogPosts: "warn",
       },
       theme: {
-        customCss: [
-          path.join(PACKAGE_ROOT, "src", "css", "custom.css"),
-        ],
+        customCss: [path.join(PACKAGE_ROOT, "src", "css", "custom.css")],
       },
     },
   ];
@@ -48,7 +93,6 @@ export function skellyPreset(
 
 /**
  * Returns the themeConfig object for use in docusaurus.config.ts.
- * Keeps the consuming config minimal.
  */
 export function skellyThemeConfig(options: {
   title: string;
@@ -95,9 +139,7 @@ export function skellyThemeConfig(options: {
       links: [
         {
           title: "Documentation",
-          items: [
-            { label: "Getting Started", to: "/docs/" },
-          ],
+          items: [{ label: "Getting Started", to: "/docs/" }],
         },
         {
           title: "Community",
@@ -130,11 +172,3 @@ export function skellyThemeConfig(options: {
     },
   };
 }
-
-export default skellyPreset;
-
-// Re-export config helpers so docusaurus.config.ts can import everything
-// from '@freemocap/skellydocs/preset' without pulling in theme components
-// (which import CSS that crashes jiti at config-load time).
-export { defaultLocales } from "./locales.js";
-export type { SkellyPresetOptions } from "./types.js";
