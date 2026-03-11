@@ -41,6 +41,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          sidebarPath: require.resolve('./sidebars.ts'),
           routeBasePath: 'docs',
           editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
         },
