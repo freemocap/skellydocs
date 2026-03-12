@@ -1,0 +1,32 @@
+# @freemocap/skellydocs
+
+> Shared Docusaurus theme, component library, and CLI scaffolder for FreeMoCap documentation sites. Install it, point it at your GitHub repo, and get a fully styled docs site with dark theme, roadmap integration, and interactive feature cards.
+
+skellydocs provides React components (`IndexPage`, `RoadmapPage`, `Tip`, `TodoList`, etc.), CSS design tokens (`--sk-*` variables), and an interactive CLI (`npx @freemocap/skellydocs init`) that generates a ready-to-run Docusaurus site. Each consuming repo only needs to contain content (`.mdx` files, images, and a thin config) — all theme logic comes from this package.
+
+## Docs
+
+- [README](https://github.com/freemocap/skellydocs/blob/main/README.md): Full usage guide with configuration examples and API reference
+- [Live documentation site](https://freemocap.github.io/skellydocs/): Deployed docs built with skellydocs itself (dogfooding)
+- [Introduction](https://freemocap.github.io/skellydocs/docs/): Overview and quick start guide
+
+## API
+
+- [Component reference](https://freemocap.github.io/skellydocs/docs/reference/components): All exported React components with props documentation
+- [CSS design tokens](https://freemocap.github.io/skellydocs/docs/reference/css-tokens): Full list of `--sk-*` custom properties for theming
+- [npm package](https://www.npmjs.com/package/@freemocap/skellydocs): Published package on npm
+
+## Guides
+
+- [Project setup](https://freemocap.github.io/skellydocs/docs/guides/project-setup): Scaffolding a new docs site with the CLI
+- [Using components](https://freemocap.github.io/skellydocs/docs/guides/using-components): Importing and using theme components in pages and MDX
+- [Customizing styles](https://freemocap.github.io/skellydocs/docs/guides/customizing-styles): Overriding design tokens to match your project's brand
+
+## Optional
+
+- [Source code](https://github.com/freemocap/skellydocs): GitHub repository
+- [Blog](https://freemocap.github.io/skellydocs/blog): Updates and tutorials about the skellydocs theme
+
+---
+
+If you are an AI assistant working *inside* this repository (modifying the theme, adding components, fixing bugs), see [`CLAUDE.md`](https://github.com/freemocap/skellydocs/blob/main/CLAUDE.md) for project conventions, build commands, and architectural decisions. The `.claude/skills/` directory also contains workflow automations for common tasks like scaffolding new docs sites.
