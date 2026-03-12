@@ -4,6 +4,10 @@ slug: /
 title: Introduction
 ---
 
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
 # Welcome to skellydocs 📖
 
 **skellydocs** is a shared [Docusaurus](https://docusaurus.io/) theme and toolkit for [FreeMoCap](https://freemocap.org) documentation sites.
@@ -11,6 +15,10 @@ title: Introduction
 Every FreeMoCap sub-project — SkellyCam, SkellyTracker, FreeMoCap core — gets the same dark-theme design, GitHub-integrated roadmap, interactive feature cards, and i18n setup without duplicating a single component or CSS file.
 
 Each repo's docs folder contains **only content** (markdown, images, and a thin config). Everything else comes from this package.
+
+:::tip Why `.mdx`?
+All docs in this site use the `.mdx` extension instead of `.md`. MDX lets you import and use React components directly in your documentation — like the `<AiGeneratedBanner />` at the top of this page. Since skellydocs is a component library, `.mdx` is the natural fit.
+:::
 
 ## What's in the box
 

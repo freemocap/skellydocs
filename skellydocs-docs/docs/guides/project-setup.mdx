@@ -3,6 +3,10 @@ sidebar_position: 1
 title: Project Setup
 ---
 
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
 # Setting up a new docs site
 
 ## Scaffold with the CLI
@@ -18,7 +22,7 @@ This generates a ready-to-run docs site:
 ```
 your-project-docs/
 ├── docs/
-│   └── intro.md
+│   └── intro.mdx
 ├── src/pages/
 │   ├── index.tsx          # Wrapper around IndexPage
 │   └── roadmap.tsx        # Wrapper around RoadmapPage
@@ -48,6 +52,6 @@ Your docs site only needs to contain **content** — markdown files, images, and
 |---|---|
 | `content.config.tsx` | Landing page content: hero, features, guarantees |
 | `docusaurus.config.ts` | Docusaurus site configuration |
-| `docs/` | Your markdown documentation |
+| `docs/` | Your `.mdx` documentation |
 | `static/img/` | Images, logos, favicons |
 | `src/pages/` | Custom pages (index, roadmap) |

@@ -139,4 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 *.zip
+# Claude Code — ignore local state, keep shared config
 .claude/*
+!.claude/skills/
+!.claude/settings.json
