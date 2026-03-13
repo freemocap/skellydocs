@@ -25,7 +25,9 @@ export default defineConfig([
       /\.css$/,
     ],
   },
-  // CLI — bundled into a single file (it runs standalone, not via Docusaurus)
+  // CLI — bundled into a single file (it runs standalone, not via Docusaurus).
+  // handlebars + prompts use CJS dynamic requires of Node builtins (readline,
+  // etc.) that can't be converted to ESM, so they stay external.
   {
     entry: {
       "bin/create-skellydocs": "src/bin/create-skellydocs.ts",
@@ -33,6 +35,7 @@ export default defineConfig([
     format: ["esm"],
     splitting: false,
     sourcemap: true,
+    external: ["handlebars", "prompts"],
     banner: {
       js: "#!/usr/bin/env node",
     },

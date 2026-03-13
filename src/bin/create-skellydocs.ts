@@ -7,7 +7,15 @@ import prompts from "prompts";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // From dist/bin/ we need to go up two levels to reach the package root where templates/ lives
-const TEMPLATES_DIR = path.resolve(__dirname, "..", "..", "templates");
+const PKG_ROOT = path.resolve(__dirname, "..", "..");
+const TEMPLATES_DIR = path.join(PKG_ROOT, "templates");
+
+/** Read our own package.json version so templates always match the installed CLI */
+function getOwnVersion(): string {
+  const pkgPath = path.join(PKG_ROOT, "package.json");
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+  return pkg.version as string;
+}
 
 const PROMPTS_CANCEL = {
   onCancel: () => {
@@ -119,6 +127,7 @@ async function runInit(): Promise<void> {
     repo: repo,
     repoUrl: repoUrl,
     baseUrl: `/${projectName}/`,
+    skellydocsVersion: getOwnVersion(),
   };
 
   writeFile(
