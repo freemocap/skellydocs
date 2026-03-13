@@ -121,6 +121,8 @@ async function runInit(): Promise<void> {
 
   console.log(`\nScaffolding into ${targetDir}...\n`);
 
+  const isoDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
   const templateData: Record<string, string> = {
     projectName: projectName,
     orgName: orgName,
@@ -128,6 +130,7 @@ async function runInit(): Promise<void> {
     repoUrl: repoUrl,
     baseUrl: `/${projectName}/`,
     skellydocsVersion: getOwnVersion(),
+    isoDate: isoDate,
   };
 
   writeFile(
@@ -151,8 +154,13 @@ async function runInit(): Promise<void> {
   );
 
   writeFile(
-    path.join(targetDir, "docs", "intro.md"),
-    renderTemplate("docs/intro.md.hbs", templateData),
+    path.join(targetDir, "docs", "intro.mdx"),
+    renderTemplate("docs/intro.mdx.hbs", templateData),
+  );
+
+  writeFile(
+    path.join(targetDir, "blog", `${isoDate}_welcome.mdx`),
+    renderTemplate("blog/init.mdx.hbs", templateData),
   );
 
   const pagesDir = path.join(targetDir, "src", "pages");

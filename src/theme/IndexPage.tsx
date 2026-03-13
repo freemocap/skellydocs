@@ -39,10 +39,10 @@ function HeroSection({
         </p>
         <p className={styles.heroTagline}>{hero.tagline}</p>
         <div className={styles.heroCtas}>
-          <Link className={styles.ctaPrimary} to="/docs/">
+          <Link className={styles.ctaPrimary} to="/docs/intro">
             Get Started
           </Link>
-          <Link className={styles.ctaSecondary} to="/docs/">
+          <Link className={styles.ctaSecondary} to="/docs/intro">
             Learn More
           </Link>
         </div>
