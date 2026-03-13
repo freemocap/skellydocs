@@ -1,6 +1,6 @@
 {
   "name": "@freemocap/skellydocs",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Shared Docusaurus theme, preset, and CLI for FreeMoCap documentation sites",
   "license": "MIT",
   "repository": {
