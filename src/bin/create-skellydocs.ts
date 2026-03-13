@@ -37,12 +37,15 @@ function extractOrgName(repoUrl: string): string {
 }
 
 async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
+  const cwdName = path.basename(process.cwd());
+
   const { repoUrl } = await prompts(
     {
       type: "text",
       name: "repoUrl",
       message: "Repo URL (e.g. https://github.com/freemocap/skellycam)",
       validate: (v: string) => {
+        if (!v.trim()) return true; // allow empty — will use cwd name
         try {
           extractProjectName(v);
           return true;
@@ -54,7 +57,8 @@ async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
     PROMPTS_CANCEL,
   );
 
-  const defaultName = extractProjectName(repoUrl as string);
+  const rawUrl = (repoUrl as string).trim();
+  const defaultName = rawUrl ? extractProjectName(rawUrl) : cwdName;
 
   const { projectName } = await prompts(
     {
@@ -67,7 +71,7 @@ async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
     PROMPTS_CANCEL,
   );
 
-  return { repoUrl: (repoUrl as string).trim(), projectName: (projectName as string).trim() };
+  return { repoUrl: rawUrl, projectName: (projectName as string).trim() };
 }
 
 function renderTemplate(templateName: string, data: Record<string, string>): string {
@@ -103,7 +107,7 @@ async function runInit(): Promise<void> {
   console.log("\n🦴 skellydocs — scaffold a new docs site\n");
 
   const { repoUrl, projectName } = await promptUser();
-  const orgName = extractOrgName(repoUrl);
+  const orgName = repoUrl ? extractOrgName(repoUrl) : "";
   const repo = orgName ? `${orgName}/${projectName}` : projectName;
   const targetDir = path.resolve(`./${projectName}-docs`);
 
