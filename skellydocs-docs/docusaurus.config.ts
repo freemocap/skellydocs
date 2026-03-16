@@ -76,7 +76,7 @@ const config: Config = {
         { type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Docs' },
         { to: '/blog', label: 'Blog', position: 'left' },
         { to: '/roadmap', label: 'Roadmap', position: 'left' },
-        { href: 'https://github.com/freemocap/skellydocs/', label: 'Code', position: 'right' },
+        { href: 'https://github.com/freemocap/skellydocs', label: 'Code', position: 'right' },
       ],
     },
     footer: {
@@ -90,7 +90,7 @@ const config: Config = {
           title: 'Community',
           items: [
             { label: 'Discord', href: 'https://discord.gg/freemocap' },
-            { label: 'Source Code', href: 'https://github.com/freemocap/skellydocs/' },
+            { label: 'Source Code', href: 'https://github.com/freemocap/skellydocs' },
             { label: 'FreeMoCap', href: 'https://freemocap.org' },
           ],
         },

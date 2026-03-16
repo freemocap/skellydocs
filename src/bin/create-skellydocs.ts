@@ -175,6 +175,9 @@ async function runInit(): Promise<void> {
 
   const isoDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
+  // Is the scaffolded site being created directly inside the skellydocs package?
+  const isLocalDev = path.resolve(targetDir, "..") === PKG_ROOT;
+
   const templateData: Record<string, string> = {
     projectName,
     orgName,
@@ -185,6 +188,7 @@ async function runInit(): Promise<void> {
     siteUrl,
     baseUrl: `/${projectName}/`,
     skellydocsVersion: getOwnVersion(),
+    skellydocsDep: isLocalDev ? "file:.." : `^${getOwnVersion()}`,
     isoDate,
   };
 
@@ -232,7 +236,7 @@ async function runInit(): Promise<void> {
 
   writeFile(
     path.join(pagesDir, "roadmap.tsx"),
-    `import { RoadmapPage } from '@freemocap/skellydocs';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} />;\n}\n`,
+    `import { RoadmapPage, collectLinkedUrls } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} pinnedIssues={collectLinkedUrls(config)} />;\n}\n`,
   );
 
   // --- Static assets ---
@@ -271,8 +275,7 @@ async function runInit(): Promise<void> {
   Linking issues to feature cards:
 
     Each feature in content.config.tsx has an issues[] array.
-    Add entries like { label: 'Add streaming', number: 42 }
-    to show linked issues on that feature's card and doc page:
+    Add entries with a label and the full issue/PR URL:
 
       features: [
         {
@@ -281,34 +284,27 @@ async function runInit(): Promise<void> {
           title: 'My Feature',
           ...
           issues: [
-            { label: 'Add streaming support', number: 42 },
-            { label: 'Fix edge case', number: 108 },
+            { label: 'Add streaming support', url: 'https://github.com/${repo}/issues/42' },
+            { label: 'Fix edge case', url: 'https://github.com/${repo}/pull/108' },
           ],
         },
       ],
 
     The same format works for guaranteeIssues[] at the top level.
+    Linked issues automatically appear on the /roadmap page too.
 
   Roadmap (/roadmap page):
 
     Issues and PRs appear on the roadmap in two ways:
 
-    1. "roadmap" label — create this label in your repo,
-       then add it to any issues/PRs. They'll appear
-       automatically. The label is hidden in the display
-       so other labels show as category filters.
+    1. Tagged — add a "roadmap" label to any issue/PR in
+       your repo. They'll appear automatically.
 
-    2. Pinned issues — reference specific issue numbers
-       in src/pages/roadmap.tsx via the pinnedIssues prop:
+    2. Pinned — any issue/PR linked in content.config.tsx
+       (via the issues[] arrays above) is auto-included.
+       No extra config needed.
 
-         <RoadmapPage repo={REPO} pinnedIssues={[1, 42, 99]} />
-
-       These always appear, no label needed. Great for
-       linking issues directly from your docs via the
-       issues in content.config.tsx.
-
-    Both sources are merged and deduplicated. Set the REPO
-    constant in src/pages/roadmap.tsx to your org/repo.
+    Both sources are merged and deduplicated.
 
   Happy documenting! 🦴
 `);

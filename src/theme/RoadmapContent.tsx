@@ -144,16 +144,19 @@ function fetchRoadmapItems(
 }
 
 /**
- * Fetch specific issues by number using individual GET requests.
+ * Fetch specific issues/PRs by URL using individual GET requests.
+ * Parses each URL to extract repo + number, fetches via GitHub API.
  * Results are cached together under a single cache key.
- * Each request hits /repos/{owner}/{repo}/issues/{number}.
  */
 async function fetchPinnedItems(
-  repo: string,
-  issueNumbers: number[],
+  pinnedUrls: string[],
   cacheKey: string,
 ): Promise<FetchResult> {
-  if (issueNumbers.length === 0) {
+  const parsed = pinnedUrls
+    .map(parseIssueUrl)
+    .filter((p): p is { repo: string; number: number } => p !== null);
+
+  if (parsed.length === 0) {
     return { status: "ok", items: [] };
   }
 
@@ -164,7 +167,7 @@ async function fetchPinnedItems(
 
   try {
     const results = await Promise.all(
-      issueNumbers.map(async (num) => {
+      parsed.map(async ({ repo, number: num }) => {
         const url = `https://api.github.com/repos/${repo}/issues/${num}`;
         const resp = await fetch(url, {
           headers: { Accept: "application/vnd.github.v3+json" },
@@ -187,6 +190,19 @@ async function fetchPinnedItems(
       items: cache?.items ?? [],
       message: `Could not fetch pinned issues: ${message}`,
     };
+  }
+}
+
+/** Parse a GitHub/GitLab issue or PR URL into repo + number. Returns null if unparseable. */
+function parseIssueUrl(url: string): { repo: string; number: number } | null {
+  try {
+    const u = new URL(url);
+    // Matches: /owner/repo/issues/42 or /owner/repo/pull/42
+    const match = u.pathname.match(/^\/([^/]+\/[^/]+)\/(?:issues|pull)\/(\d+)/);
+    if (!match) return null;
+    return { repo: match[1], number: Number.parseInt(match[2], 10) };
+  } catch {
+    return null;
   }
 }
 
@@ -265,8 +281,8 @@ function AboutRoadmap({ hasPinned }: { hasPinned: boolean }) {
         {hasPinned && (
           <p>
             Items marked <span className={styles.roadmapPinnedBadge}>pinned</span> are
-            linked from somewhere in the docs; the rest are tagged with
-            the "roadmap" label.
+            linked from a feature card in the docs; items
+            marked <em>labeled</em> have the "roadmap" label on the repo.
           </p>
         )}
         <details>
@@ -307,8 +323,8 @@ export default function RoadmapContent({
 }: {
   repo: string;
   roadmapLabel?: string;
-  /** Issue/PR numbers to always include, even without the roadmap label */
-  pinnedIssues?: number[];
+  /** Issue/PR URLs to always include, even without the roadmap label */
+  pinnedIssues?: string[];
 }) {
   const labelCacheKey = `sk-roadmap-${repo}`;
   const pinnedCacheKey = `sk-roadmap-pinned-${repo}`;
@@ -328,7 +344,7 @@ export default function RoadmapContent({
   useEffect(() => {
     Promise.all([
       fetchRoadmapItems(repo, roadmapLabel, labelCacheKey),
-      fetchPinnedItems(repo, pinnedIssues, pinnedCacheKey),
+      fetchPinnedItems(pinnedIssues, pinnedCacheKey),
     ]).then(([labelResult, pinnedResult]) => {
       setItems(mergeItems(labelResult.items, pinnedResult.items));
       const errors: string[] = [];
@@ -348,7 +364,7 @@ export default function RoadmapContent({
     } catch {}
     Promise.all([
       fetchRoadmapItems(repo, roadmapLabel, labelCacheKey),
-      fetchPinnedItems(repo, pinnedIssues, pinnedCacheKey),
+      fetchPinnedItems(pinnedIssues, pinnedCacheKey),
     ]).then(([labelResult, pinnedResult]) => {
       setItems(mergeItems(labelResult.items, pinnedResult.items));
       const errors: string[] = [];

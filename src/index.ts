@@ -20,3 +20,4 @@ export { default as RoadmapContent } from "./theme/RoadmapContent.js";
 export { default as IndexPage } from "./theme/IndexPage.js";
 export { default as RoadmapPage } from "./theme/RoadmapPage.js";
 export { default as AiGeneratedBanner } from "./theme/AiGeneratedBanner.js";
+export { collectLinkedUrls } from "./theme/collectLinkedUrls.js";

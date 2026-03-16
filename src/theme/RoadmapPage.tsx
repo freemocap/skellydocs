@@ -15,8 +15,8 @@ export default function RoadmapPage({
 }: {
   repo: string;
   roadmapLabel?: string;
-  /** Issue/PR numbers to always include, even without the roadmap label */
-  pinnedIssues?: number[];
+  /** Issue/PR URLs to always include, even without the roadmap label */
+  pinnedIssues?: string[];
   title?: string;
 }): ReactNode {
   return (
