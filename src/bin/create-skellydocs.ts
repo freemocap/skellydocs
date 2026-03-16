@@ -23,20 +23,9 @@ const PROMPTS_CANCEL = {
   },
 };
 
-/** Extracts the last non-empty path segment from a URL or bare string */
-function extractProjectName(repoUrl: string): string {
-  const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
-  const segments = trimmed.split("/").filter(Boolean);
-  const last = segments.at(-1);
-  if (!last) {
-    throw new Error(`Could not extract project name from "${repoUrl}"`);
-  }
-  return last;
-}
-
-/** Extracts the second-to-last path segment as the org/owner name */
-function extractOrgName(repoUrl: string): string {
-  const trimmed = repoUrl.trim().replace(/\/+$/, "").replace(/\.git$/, "");
+/** Extracts the org/owner from a URL (the second-to-last path segment) */
+function extractOrgName(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, "").replace(/\.git$/, "");
   const segments = trimmed.split("/").filter(Boolean);
   if (segments.length >= 2) {
     return segments.at(-2)!;
@@ -44,42 +33,85 @@ function extractOrgName(repoUrl: string): string {
   return "";
 }
 
-async function promptUser(): Promise<{ repoUrl: string; projectName: string }> {
+/**
+ * Build a Docusaurus editUrl from a repo URL.
+ * Supports GitHub, GitLab, and Codeberg-style URLs (/tree/main/ or /-/tree/main/).
+ * Returns empty string if the URL doesn't look like a known forge.
+ */
+function buildEditUrl(repoUrl: string, docsDir: string): string {
+  if (!repoUrl) return "";
+  try {
+    const u = new URL(repoUrl);
+    const host = u.hostname.toLowerCase();
+    if (host.includes("gitlab")) {
+      return `${repoUrl.replace(/\/+$/, "")}/-/tree/main/${docsDir}/`;
+    }
+    // GitHub, Codeberg, Gitea, and most other forges use /tree/main/
+    return `${repoUrl.replace(/\/+$/, "")}/tree/main/${docsDir}/`;
+  } catch {
+    return "";
+  }
+}
+
+interface UserInput {
+  projectName: string;
+  repoUrl: string;
+  projectUrl: string;
+  logoPath: string;
+}
+
+async function promptUser(): Promise<UserInput> {
   const cwdName = path.basename(process.cwd());
-
-  const { repoUrl } = await prompts(
-    {
-      type: "text",
-      name: "repoUrl",
-      message: "Repo URL (e.g. https://github.com/freemocap/skellycam)",
-      validate: (v: string) => {
-        if (!v.trim()) return true; // allow empty — will use cwd name
-        try {
-          extractProjectName(v);
-          return true;
-        } catch (e) {
-          return (e as Error).message;
-        }
-      },
-    },
-    PROMPTS_CANCEL,
-  );
-
-  const rawUrl = (repoUrl as string).trim();
-  const defaultName = rawUrl ? extractProjectName(rawUrl) : cwdName;
 
   const { projectName } = await prompts(
     {
       type: "text",
       name: "projectName",
-      message: "Project name?",
-      initial: defaultName,
+      message: "Project name",
+      initial: cwdName,
       validate: (v: string) => v.trim().length > 0 || "Required",
     },
     PROMPTS_CANCEL,
   );
 
-  return { repoUrl: rawUrl, projectName: (projectName as string).trim() };
+  const { repoUrl } = await prompts(
+    {
+      type: "text",
+      name: "repoUrl",
+      message: "Source code URL (GitHub, GitLab, Codeberg, etc. — leave blank to skip)",
+    },
+    PROMPTS_CANCEL,
+  );
+
+  const { projectUrl } = await prompts(
+    {
+      type: "text",
+      name: "projectUrl",
+      message: "Project website URL (leave blank to skip)",
+    },
+    PROMPTS_CANCEL,
+  );
+
+  const { logoPath } = await prompts(
+    {
+      type: "text",
+      name: "logoPath",
+      message: "Path to a logo file (leave blank for default skeleton logo)",
+      validate: (v: string) => {
+        if (!v.trim()) return true;
+        if (!fs.existsSync(v.trim())) return `File not found: ${v.trim()}`;
+        return true;
+      },
+    },
+    PROMPTS_CANCEL,
+  );
+
+  return {
+    projectName: (projectName as string).trim(),
+    repoUrl: (repoUrl as string).trim(),
+    projectUrl: (projectUrl as string).trim(),
+    logoPath: (logoPath as string).trim(),
+  };
 }
 
 function renderTemplate(templateName: string, data: Record<string, string>): string {
@@ -96,7 +128,14 @@ function writeFile(filePath: string, content: string): void {
   const dir = path.dirname(filePath);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(filePath, content, "utf-8");
-  console.log(`  created ${filePath}`);
+  console.log(`  created ${path.relative(process.cwd(), filePath)}`);
+}
+
+function copyFile(src: string, dest: string): void {
+  const dir = path.dirname(dest);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.copyFileSync(src, dest);
+  console.log(`  created ${path.relative(process.cwd(), dest)}`);
 }
 
 async function main(): Promise<void> {
@@ -114,25 +153,44 @@ async function main(): Promise<void> {
 async function runInit(): Promise<void> {
   console.log("\n🦴 skellydocs — scaffold a new docs site\n");
 
-  const { repoUrl, projectName } = await promptUser();
+  const { projectName, repoUrl, projectUrl, logoPath } = await promptUser();
+
   const orgName = repoUrl ? extractOrgName(repoUrl) : "";
   const repo = orgName ? `${orgName}/${projectName}` : projectName;
-  const targetDir = path.resolve(`./${projectName}-docs`);
+  const docsDir = `${projectName}-docs`;
+  const targetDir = path.resolve(`./${docsDir}`);
+  const editUrl = buildEditUrl(repoUrl, docsDir);
 
-  console.log(`\nScaffolding into ${targetDir}...\n`);
+  // Docusaurus `url` must be just the origin (no path). Extract it from the
+  // project website if provided, otherwise fall back to a placeholder.
+  let siteUrl = `https://${orgName || projectName}.github.io`;
+  if (projectUrl) {
+    try {
+      const u = new URL(projectUrl);
+      siteUrl = u.origin;
+    } catch {
+      siteUrl = projectUrl;
+    }
+  }
 
   const isoDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
   const templateData: Record<string, string> = {
-    projectName: projectName,
-    orgName: orgName,
-    repo: repo,
-    repoUrl: repoUrl,
+    projectName,
+    orgName,
+    repo,
+    repoUrl,
+    projectUrl,
+    editUrl,
+    siteUrl,
     baseUrl: `/${projectName}/`,
     skellydocsVersion: getOwnVersion(),
-    isoDate: isoDate,
+    isoDate,
   };
 
+  console.log(`\nScaffolding ${docsDir}...\n`);
+
+  // --- Config files ---
   writeFile(
     path.join(targetDir, "package.json"),
     renderTemplate("package.json.hbs", templateData),
@@ -153,6 +211,7 @@ async function runInit(): Promise<void> {
     `import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';\n\nconst sidebars: SidebarsConfig = {\n  docsSidebar: [{type: 'autogenerated', dirName: '.'}],\n};\n\nexport default sidebars;\n`,
   );
 
+  // --- Content ---
   writeFile(
     path.join(targetDir, "docs", "intro.mdx"),
     renderTemplate("docs/intro.mdx.hbs", templateData),
@@ -163,11 +222,12 @@ async function runInit(): Promise<void> {
     renderTemplate("blog/init.mdx.hbs", templateData),
   );
 
+  // --- Pages ---
   const pagesDir = path.join(targetDir, "src", "pages");
 
   writeFile(
     path.join(pagesDir, "index.tsx"),
-    `import { IndexPage } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${repo}';\n\nexport default function Home() {\n  return <IndexPage config={config} repo={REPO} />;\n}\n`,
+    `import { IndexPage } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nexport default function Home() {\n  return <IndexPage config={config} />;\n}\n`,
   );
 
   writeFile(
@@ -175,10 +235,83 @@ async function runInit(): Promise<void> {
     `import { RoadmapPage } from '@freemocap/skellydocs';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} />;\n}\n`,
   );
 
-  console.log("\n✅ Done! Next steps:\n");
-  console.log(`  cd ${projectName}-docs`);
-  console.log("  npm install");
-  console.log("  npm start\n");
+  // --- Static assets ---
+  const logoDestination = path.join(targetDir, "static", "img", "logo.svg");
+  if (logoPath) {
+    copyFile(logoPath, logoDestination);
+  } else {
+    const defaultLogo = path.join(TEMPLATES_DIR, "static", "img", "logo.svg");
+    copyFile(defaultLogo, logoDestination);
+  }
+
+  // --- Done ---
+  const logoNote = logoPath
+    ? `Your logo was copied from ${logoPath}`
+    : "A placeholder logo was added — swap it with your own any time";
+
+  console.log(`
+✅ ${docsDir} is ready!
+
+  Get started:
+
+    cd ${docsDir}
+    npm install
+    npm start
+
+  Customize your site:
+
+    Logo        → static/img/logo.svg
+                  ${logoNote}
+    Title       → content.config.tsx → hero.title
+    Tagline     → content.config.tsx → hero.tagline
+    Subtitle    → content.config.tsx → hero.subtitle
+    Features    → content.config.tsx → features[]
+    Code link   → docusaurus.config.ts → themeConfig.navbar.items
+
+  Linking issues to feature cards:
+
+    Each feature in content.config.tsx has an issues[] array.
+    Add entries like { label: 'Add streaming', number: 42 }
+    to show linked issues on that feature's card and doc page:
+
+      features: [
+        {
+          id: 'my-feature',
+          icon: '🚀',
+          title: 'My Feature',
+          ...
+          issues: [
+            { label: 'Add streaming support', number: 42 },
+            { label: 'Fix edge case', number: 108 },
+          ],
+        },
+      ],
+
+    The same format works for guaranteeIssues[] at the top level.
+
+  Roadmap (/roadmap page):
+
+    Issues and PRs appear on the roadmap in two ways:
+
+    1. "roadmap" label — create this label in your repo,
+       then add it to any issues/PRs. They'll appear
+       automatically. The label is hidden in the display
+       so other labels show as category filters.
+
+    2. Pinned issues — reference specific issue numbers
+       in src/pages/roadmap.tsx via the pinnedIssues prop:
+
+         <RoadmapPage repo={REPO} pinnedIssues={[1, 42, 99]} />
+
+       These always appear, no label needed. Great for
+       linking issues directly from your docs via the
+       issues in content.config.tsx.
+
+    Both sources are merged and deduplicated. Set the REPO
+    constant in src/pages/roadmap.tsx to your org/repo.
+
+  Happy documenting! 🦴
+`);
 }
 
 main().catch((err: Error) => {

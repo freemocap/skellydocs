@@ -10,10 +10,13 @@ import styles from "../css/theme.module.css";
 export default function RoadmapPage({
   repo,
   roadmapLabel = "roadmap",
+  pinnedIssues = [],
   title = "Roadmap",
 }: {
   repo: string;
   roadmapLabel?: string;
+  /** Issue/PR numbers to always include, even without the roadmap label */
+  pinnedIssues?: number[];
   title?: string;
 }): ReactNode {
   return (
@@ -22,7 +25,7 @@ export default function RoadmapPage({
       description={`${title} — what we're working on and what's next`}
     >
       <main className={styles.main}>
-        <RoadmapContent repo={repo} roadmapLabel={roadmapLabel} />
+        <RoadmapContent repo={repo} roadmapLabel={roadmapLabel} pinnedIssues={pinnedIssues} />
       </main>
     </Layout>
   );

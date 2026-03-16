@@ -3,7 +3,7 @@ export type {
   SkellyDocsConfig,
   HeroConfig,
   CoreFeature,
-  TodoItem,
+  LinkedIssue,
   RoadmapItem,
   GitHubLabel,
   ItemType,
@@ -13,7 +13,7 @@ export type {
 
 // ── Theme components (re-exported for use in consuming repos) ──
 export { default as Tip } from "./theme/Tip.js";
-export { default as TodoList } from "./theme/TodoList.js";
+export { default as LinkedIssues } from "./theme/LinkedIssues.js";
 export { default as CoreFeatureHeader } from "./theme/CoreFeatureHeader.js";
 export { default as RoadmapEntry } from "./theme/RoadmapEntry.js";
 export { default as RoadmapContent } from "./theme/RoadmapContent.js";

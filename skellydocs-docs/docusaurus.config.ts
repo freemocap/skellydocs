@@ -6,10 +6,10 @@ const config: Config = {
   tagline: 'Documentation for skellydocs',
   favicon: 'img/favicon.ico',
 
-  url: 'https://.github.io',
+  url: 'https://docs.freemocap.org',
   baseUrl: '/skellydocs/',
 
-  organizationName: '',
+  organizationName: 'freemocap',
   projectName: 'skellydocs',
 
   onBrokenLinks: 'throw',
@@ -43,12 +43,12 @@ const config: Config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.ts'),
           routeBasePath: 'docs',
-          editUrl: '/tree/main/skellydocs-docs/',
+          editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
         },
         blog: {
           showReadingTime: true,
           feedOptions: { type: ['rss', 'atom'], xslt: true },
-          editUrl: '/tree/main/skellydocs-docs/',
+          editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -76,7 +76,7 @@ const config: Config = {
         { type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Docs' },
         { to: '/blog', label: 'Blog', position: 'left' },
         { to: '/roadmap', label: 'Roadmap', position: 'left' },
-        
+        { href: 'https://github.com/freemocap/skellydocs/', label: 'Code', position: 'right' },
       ],
     },
     footer: {
@@ -90,7 +90,7 @@ const config: Config = {
           title: 'Community',
           items: [
             { label: 'Discord', href: 'https://discord.gg/freemocap' },
-            
+            { label: 'Source Code', href: 'https://github.com/freemocap/skellydocs/' },
             { label: 'FreeMoCap', href: 'https://freemocap.org' },
           ],
         },
@@ -98,7 +98,7 @@ const config: Config = {
           title: 'More',
           items: [
             { label: 'Blog', to: '/blog' },
-            
+            { label: 'Website', href: 'https://docs.freemocap.org/skellydocs/' },
           ],
         },
       ],

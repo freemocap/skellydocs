@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 export type ItemType = "issue" | "pr";
 export type ItemStatus = "open" | "closed";
+export type ItemSource = "labeled" | "pinned";
 
 export type GitHubLabel = {
   name: string;
@@ -16,6 +17,7 @@ export type RoadmapItem = {
   excerpt: string;
   type: ItemType;
   status: ItemStatus;
+  source: ItemSource;
   labels: GitHubLabel[];
   updatedAt: string;
   createdAt: string;
@@ -24,11 +26,11 @@ export type RoadmapItem = {
 
 export type SortKey = "updated" | "newest" | "oldest";
 
-// ── Todo item (used by TodoList and feature cards) ──
+// ── Linked issue (used by LinkedIssues component and feature cards) ──
 
-export type TodoItem = {
+export type LinkedIssue = {
   label: string;
-  issueNum: number;
+  url: string;
 };
 
 // ── Core feature (used by index page cards and doc headers) ──
@@ -39,7 +41,7 @@ export type CoreFeature = {
   title: string;
   description: string;
   summary: ReactNode;
-  todos: TodoItem[];
+  issues: LinkedIssue[];
   docPath: string;
 };
 
@@ -61,5 +63,5 @@ export type SkellyDocsConfig = {
   hero: HeroConfig;
   features: CoreFeature[];
   guarantees: string[];
-  guaranteeTodos: TodoItem[];
+  guaranteeIssues: LinkedIssue[];
 };

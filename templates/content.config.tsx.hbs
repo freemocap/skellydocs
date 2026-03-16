@@ -6,7 +6,7 @@ const config: SkellyDocsConfig = {
     accentedSuffix: '{{projectName}}',
     subtitle: 'Part of the FreeMoCap ecosystem',
     tagline: 'Add your project tagline here',
-    logoSrc: '/img/logo.svg',
+    logoSrc: '{{baseUrl}}img/logo.svg',
     parentProject: {
       name: 'FreeMoCap',
       url: 'https://freemocap.org',
@@ -20,7 +20,7 @@ const config: SkellyDocsConfig = {
       title: 'Example Feature',
       description: 'Describe what this feature does.',
       summary: <>Describe what this feature does in a sentence or two.</>,
-      todos: [],
+      issues: [],
       docPath: 'intro',
     },
   ],
@@ -29,7 +29,7 @@ const config: SkellyDocsConfig = {
     'Add your project guarantees here',
   ],
 
-  guaranteeTodos: [],
+  guaranteeIssues: [],
 };
 
 export default config;

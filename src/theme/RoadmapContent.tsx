@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "../css/theme.module.css";
 import type {
   GitHubLabel,
+  ItemSource,
   ItemStatus,
   ItemType,
   RoadmapItem,
@@ -35,7 +36,7 @@ function extractExcerpt(body: string | null): string {
   return sentences.slice(0, 2).join(" ").slice(0, 280);
 }
 
-function parseItem(raw: Record<string, unknown>): RoadmapItem {
+function parseItem(raw: Record<string, unknown>, source: ItemSource): RoadmapItem {
   const labels = (raw.labels as Record<string, unknown>[]).map((l) => ({
     name: l.name as string,
     color: l.color as string,
@@ -47,6 +48,7 @@ function parseItem(raw: Record<string, unknown>): RoadmapItem {
     excerpt: extractExcerpt(raw.body as string | null),
     type: raw.pull_request ? "pr" : "issue",
     status: (raw.state as string) === "open" ? "open" : "closed",
+    source,
     labels: labels.filter((l) => l.name !== "roadmap"),
     updatedAt: raw.updated_at as string,
     createdAt: raw.created_at as string,
@@ -79,12 +81,11 @@ type FetchResult =
   | { status: "cached"; items: RoadmapItem[] }
   | { status: "error"; items: RoadmapItem[]; message: string };
 
-async function fetchRoadmapItems(
-  repo: string,
-  label: string,
+async function cachedFetch(
+  apiUrl: string,
   cacheKey: string,
+  parseItems: (data: unknown) => RoadmapItem[],
 ): Promise<FetchResult> {
-  const apiUrl = `https://api.github.com/repos/${repo}/issues?labels=${encodeURIComponent(label)}&state=all&per_page=100`;
   const cache = readCache(cacheKey);
 
   if (cache && Date.now() - cache.timestamp < CACHE_TTL_MS) {
@@ -115,8 +116,8 @@ async function fetchRoadmapItems(
       return { status: "error", items: cache?.items ?? [], message: msg };
     }
 
-    const data = (await response.json()) as Record<string, unknown>[];
-    const items = data.map(parseItem);
+    const data = await response.json();
+    const items = parseItems(data);
     const etag = response.headers.get("etag") ?? "";
 
     writeCache(cacheKey, { etag, timestamp: Date.now(), items });
@@ -129,6 +130,86 @@ async function fetchRoadmapItems(
       message: `Could not reach GitHub: ${message}`,
     };
   }
+}
+
+function fetchRoadmapItems(
+  repo: string,
+  label: string,
+  cacheKey: string,
+): Promise<FetchResult> {
+  const apiUrl = `https://api.github.com/repos/${repo}/issues?labels=${encodeURIComponent(label)}&state=all&per_page=100`;
+  return cachedFetch(apiUrl, cacheKey, (data) =>
+    (data as Record<string, unknown>[]).map((raw) => parseItem(raw, "labeled")),
+  );
+}
+
+/**
+ * Fetch specific issues by number using individual GET requests.
+ * Results are cached together under a single cache key.
+ * Each request hits /repos/{owner}/{repo}/issues/{number}.
+ */
+async function fetchPinnedItems(
+  repo: string,
+  issueNumbers: number[],
+  cacheKey: string,
+): Promise<FetchResult> {
+  if (issueNumbers.length === 0) {
+    return { status: "ok", items: [] };
+  }
+
+  const cache = readCache(cacheKey);
+  if (cache && Date.now() - cache.timestamp < CACHE_TTL_MS) {
+    return { status: "cached", items: cache.items };
+  }
+
+  try {
+    const results = await Promise.all(
+      issueNumbers.map(async (num) => {
+        const url = `https://api.github.com/repos/${repo}/issues/${num}`;
+        const resp = await fetch(url, {
+          headers: { Accept: "application/vnd.github.v3+json" },
+        });
+        if (!resp.ok) return null;
+        return (await resp.json()) as Record<string, unknown>;
+      }),
+    );
+
+    const items = results
+      .filter((r): r is Record<string, unknown> => r !== null)
+      .map((raw) => parseItem(raw, "pinned"));
+
+    writeCache(cacheKey, { etag: "", timestamp: Date.now(), items });
+    return { status: "ok", items };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Network error";
+    return {
+      status: "error",
+      items: cache?.items ?? [],
+      message: `Could not fetch pinned issues: ${message}`,
+    };
+  }
+}
+
+/** Merge two item arrays, deduplicating by issue number. Labeled items that are also pinned get source "both". */
+function mergeItems(labeled: RoadmapItem[], pinned: RoadmapItem[]): RoadmapItem[] {
+  const pinnedNumbers = new Set(pinned.map((p) => p.number));
+  const result: RoadmapItem[] = [];
+  const seen = new Set<number>();
+
+  for (const item of labeled) {
+    seen.add(item.number);
+    result.push({
+      ...item,
+      source: pinnedNumbers.has(item.number) ? "pinned" : "labeled",
+    });
+  }
+  for (const item of pinned) {
+    if (!seen.has(item.number)) {
+      seen.add(item.number);
+      result.push(item);
+    }
+  }
+  return result;
 }
 
 // ── Sort comparators ──
@@ -155,10 +236,65 @@ function LabelPill({
       className={`${styles.roadmapLabelPill} ${active ? styles.roadmapLabelPillActive : ""}`}
       style={{ "--label-color": `#${label.color}` } as React.CSSProperties}
       onClick={onClick}
+      title={`Filter by label: ${label.name}`}
     >
       <span className={styles.roadmapLabelDot} />
       {label.name}
     </button>
+  );
+}
+
+function AboutRoadmap({ hasPinned }: { hasPinned: boolean }) {
+  return (
+    <details className={styles.roadmapDetails}>
+      <summary className={styles.roadmapDetailsSummary} title="Learn more about this roadmap">
+        About this roadmap
+      </summary>
+      <div className={styles.roadmapDetailsBody}>
+        <p>
+          This is a live view of the work happening on this project. Every item
+          here is a real task being tracked by the team — you can click any card
+          to see the full discussion, progress updates, and context.
+        </p>
+        <p>
+          Use the filters above to find what you're looking for. You can narrow
+          by type (issues vs pull requests), status (open vs closed),
+          {hasPinned ? " source (labeled vs pinned)," : ""} or by label to
+          see a specific category.
+        </p>
+        {hasPinned && (
+          <p>
+            Items marked <span className={styles.roadmapPinnedBadge}>pinned</span> are
+            linked from somewhere in the docs; the rest are tagged with
+            the "roadmap" label.
+          </p>
+        )}
+        <details>
+          <summary>New to issues and pull requests?</summary>
+          <div>
+            <p>
+              <strong>Issues</strong> are how we track ideas, bugs, and planned
+              work. Think of them as to-do items with a conversation attached —
+              anyone can comment, ask questions, or share updates.
+            </p>
+            <p>
+              <strong>Pull requests</strong> (PRs) are proposed changes to the
+              code. When someone finishes working on an issue, they submit a PR
+              so the team can review the changes before they go live.
+            </p>
+            <p>
+              <strong>Open</strong> means work is still in progress or planned.{" "}
+              <strong>Closed</strong> means it's done (or was decided against).
+            </p>
+            <p>
+              <strong>Labels</strong> are colored tags that categorize items —
+              like "bug", "enhancement", or "documentation". Click a label pill
+              above to filter by category.
+            </p>
+          </div>
+        </details>
+      </div>
+    </details>
   );
 }
 
@@ -167,11 +303,15 @@ function LabelPill({
 export default function RoadmapContent({
   repo,
   roadmapLabel = "roadmap",
+  pinnedIssues = [],
 }: {
   repo: string;
   roadmapLabel?: string;
+  /** Issue/PR numbers to always include, even without the roadmap label */
+  pinnedIssues?: number[];
 }) {
-  const cacheKey = `sk-roadmap-${repo}`;
+  const labelCacheKey = `sk-roadmap-${repo}`;
+  const pinnedCacheKey = `sk-roadmap-pinned-${repo}`;
   const [items, setItems] = useState<RoadmapItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,33 +319,45 @@ export default function RoadmapContent({
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<ItemType | "all">("all");
   const [statusFilter, setStatusFilter] = useState<ItemStatus | "all">("all");
+  const [sourceFilter, setSourceFilter] = useState<ItemSource | "all">("all");
   const [labelFilter, setLabelFilter] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>("updated");
 
+  const hasPinned = pinnedIssues.length > 0;
+
   useEffect(() => {
-    fetchRoadmapItems(repo, roadmapLabel, cacheKey).then((result) => {
-      setItems(result.items);
-      if (result.status === "error") {
-        setError(result.message);
-      }
+    Promise.all([
+      fetchRoadmapItems(repo, roadmapLabel, labelCacheKey),
+      fetchPinnedItems(repo, pinnedIssues, pinnedCacheKey),
+    ]).then(([labelResult, pinnedResult]) => {
+      setItems(mergeItems(labelResult.items, pinnedResult.items));
+      const errors: string[] = [];
+      if (labelResult.status === "error") errors.push(labelResult.message);
+      if (pinnedResult.status === "error") errors.push(pinnedResult.message);
+      if (errors.length > 0) setError(errors.join("; "));
       setLoading(false);
     });
-  }, [repo, roadmapLabel, cacheKey]);
+  }, [repo, roadmapLabel, labelCacheKey, pinnedCacheKey, pinnedIssues]);
 
   const handleRetry = useCallback(() => {
     setLoading(true);
     setError(null);
     try {
-      localStorage.removeItem(cacheKey);
+      localStorage.removeItem(labelCacheKey);
+      localStorage.removeItem(pinnedCacheKey);
     } catch {}
-    fetchRoadmapItems(repo, roadmapLabel, cacheKey).then((result) => {
-      setItems(result.items);
-      if (result.status === "error") {
-        setError(result.message);
-      }
+    Promise.all([
+      fetchRoadmapItems(repo, roadmapLabel, labelCacheKey),
+      fetchPinnedItems(repo, pinnedIssues, pinnedCacheKey),
+    ]).then(([labelResult, pinnedResult]) => {
+      setItems(mergeItems(labelResult.items, pinnedResult.items));
+      const errors: string[] = [];
+      if (labelResult.status === "error") errors.push(labelResult.message);
+      if (pinnedResult.status === "error") errors.push(pinnedResult.message);
+      if (errors.length > 0) setError(errors.join("; "));
       setLoading(false);
     });
-  }, [repo, roadmapLabel, cacheKey]);
+  }, [repo, roadmapLabel, labelCacheKey, pinnedCacheKey, pinnedIssues]);
 
   const allLabels = useMemo(() => {
     const map = new Map<string, GitHubLabel>();
@@ -228,6 +380,8 @@ export default function RoadmapContent({
         if (typeFilter !== "all" && item.type !== typeFilter) return false;
         if (statusFilter !== "all" && item.status !== statusFilter)
           return false;
+        if (sourceFilter !== "all" && item.source !== sourceFilter)
+          return false;
         if (labelFilter && !item.labels.some((l) => l.name === labelFilter))
           return false;
         if (
@@ -240,22 +394,26 @@ export default function RoadmapContent({
         return true;
       })
       .sort(SORT_FNS[sort]);
-  }, [items, search, typeFilter, statusFilter, labelFilter, sort]);
+  }, [items, search, typeFilter, statusFilter, sourceFilter, labelFilter, sort]);
 
   return (
     <div className={styles.roadmap}>
       <div className={styles.roadmapHeader}>
         <h1 className={styles.roadmapTitle}>Roadmap</h1>
         <p className={styles.roadmapSubtitle}>
-          What we're working on and what's coming next. Each item links to the
-          GitHub conversation where the work happens.
+          What we're working on and what's coming next. Click any item to see
+          the full discussion and progress.
         </p>
       </div>
 
       {error && (
         <div className={styles.roadmapError}>
           <span>{error}</span>
-          <button className={styles.roadmapRetry} onClick={handleRetry}>
+          <button
+            className={styles.roadmapRetry}
+            onClick={handleRetry}
+            title="Clear cache and re-fetch from GitHub"
+          >
             Retry
           </button>
         </div>
@@ -268,6 +426,7 @@ export default function RoadmapContent({
           placeholder="Search roadmap…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          title="Search by title or description"
         />
         <div className={styles.roadmapFilterRow}>
           <div className={styles.roadmapChipGroup}>
@@ -276,6 +435,13 @@ export default function RoadmapContent({
                 key={t}
                 className={`${styles.roadmapChip} ${typeFilter === t ? styles.roadmapChipActive : ""}`}
                 onClick={() => setTypeFilter(t)}
+                title={
+                  t === "all"
+                    ? "Show issues and pull requests"
+                    : t === "issue"
+                      ? "Show only issues"
+                      : "Show only pull requests"
+                }
               >
                 {t === "all" ? "All types" : t === "issue" ? "Issues" : "PRs"}
               </button>
@@ -288,6 +454,13 @@ export default function RoadmapContent({
                 key={s}
                 className={`${styles.roadmapChip} ${statusFilter === s ? styles.roadmapChipActive : ""}`}
                 onClick={() => setStatusFilter(s)}
+                title={
+                  s === "all"
+                    ? "Show open and closed items"
+                    : s === "open"
+                      ? "Show only open items"
+                      : "Show only closed items"
+                }
               >
                 {s === "all"
                   ? "All statuses"
@@ -298,10 +471,36 @@ export default function RoadmapContent({
             ))}
           </div>
 
+          {hasPinned && (
+            <div className={styles.roadmapChipGroup}>
+              {(["all", "labeled", "pinned"] as const).map((src) => (
+                <button
+                  key={src}
+                  className={`${styles.roadmapChip} ${sourceFilter === src ? styles.roadmapChipActive : ""}`}
+                  onClick={() => setSourceFilter(src)}
+                  title={
+                    src === "all"
+                      ? "Show items from all sources"
+                      : src === "labeled"
+                        ? 'Show only items with the "roadmap" label'
+                        : "Show only pinned items referenced by number"
+                  }
+                >
+                  {src === "all"
+                    ? "All sources"
+                    : src === "labeled"
+                      ? "Labeled"
+                      : "Pinned"}
+                </button>
+              ))}
+            </div>
+          )}
+
           <select
             className={styles.roadmapSort}
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
+            title="Change sort order"
           >
             <option value="updated">Recently updated</option>
             <option value="newest">Newest</option>
@@ -314,6 +513,7 @@ export default function RoadmapContent({
             <button
               className={`${styles.roadmapLabelPill} ${labelFilter === null ? styles.roadmapLabelPillActive : ""}`}
               onClick={() => setLabelFilter(null)}
+              title="Show all labels"
             >
               All labels
             </button>
@@ -331,6 +531,8 @@ export default function RoadmapContent({
         )}
       </div>
 
+      <AboutRoadmap hasPinned={hasPinned} />
+
       {loading ? (
         <div className={styles.roadmapLoading}>
           <div className={styles.roadmapSpinner} />
@@ -339,7 +541,7 @@ export default function RoadmapContent({
       ) : filtered.length === 0 ? (
         <div className={styles.roadmapEmpty}>
           {items.length === 0
-            ? 'No roadmap items found. Add a "roadmap" label to GitHub issues to populate this page.'
+            ? 'No roadmap items found. Add a "roadmap" label to issues, or pass issue numbers via pinnedIssues.'
             : "No items match the current filters."}
         </div>
       ) : (
@@ -349,6 +551,7 @@ export default function RoadmapContent({
             {(search ||
               typeFilter !== "all" ||
               statusFilter !== "all" ||
+              sourceFilter !== "all" ||
               labelFilter) &&
               ` (filtered from ${items.length})`}
           </p>

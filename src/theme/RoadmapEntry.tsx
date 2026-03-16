@@ -20,7 +20,14 @@ function TypeIcon({ type }: { type: RoadmapItem["type"] }) {
 function StatusBadge({ status }: { status: RoadmapItem["status"] }) {
   const cls =
     status === "open" ? styles.roadmapStatusOpen : styles.roadmapStatusClosed;
-  return <span className={cls}>{status === "open" ? "● Open" : "✓ Closed"}</span>;
+  return (
+    <span
+      className={cls}
+      title={status === "open" ? "This item is still open" : "This item has been closed"}
+    >
+      {status === "open" ? "● Open" : "✓ Closed"}
+    </span>
+  );
 }
 
 /**
@@ -34,12 +41,26 @@ export default function RoadmapEntry({ item }: { item: RoadmapItem }) {
       target="_blank"
       rel="noopener noreferrer"
       className={styles.roadmapCard}
+      title={`${item.type === "pr" ? "PR" : "Issue"} #${item.number}: ${item.title}`}
     >
       <div className={styles.roadmapCardHeader}>
         <TypeIcon type={item.type} />
         <StatusBadge status={item.status} />
-        <span className={styles.roadmapCardNumber}>#{item.number}</span>
-        <span className={styles.roadmapCardDate}>
+        {item.source === "pinned" && (
+          <span
+            className={styles.roadmapPinnedBadge}
+            title="This item is pinned — it was explicitly referenced by number in the site config"
+          >
+            pinned
+          </span>
+        )}
+        <span className={styles.roadmapCardNumber} title={`Issue number ${item.number}`}>
+          #{item.number}
+        </span>
+        <span
+          className={styles.roadmapCardDate}
+          title={`Last updated: ${new Date(item.updatedAt).toLocaleString()}`}
+        >
           {new Date(item.updatedAt).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
@@ -60,6 +81,7 @@ export default function RoadmapEntry({ item }: { item: RoadmapItem }) {
               style={
                 { "--label-color": `#${l.color}` } as React.CSSProperties
               }
+              title={`Label: ${l.name}`}
             >
               {l.name}
             </span>

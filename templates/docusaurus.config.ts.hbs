@@ -6,7 +6,7 @@ const config: Config = {
   tagline: 'Documentation for {{projectName}}',
   favicon: 'img/favicon.ico',
 
-  url: 'https://{{orgName}}.github.io',
+  url: '{{siteUrl}}',
   baseUrl: '{{baseUrl}}',
 
   organizationName: '{{orgName}}',
@@ -43,12 +43,12 @@ const config: Config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.ts'),
           routeBasePath: 'docs',
-          editUrl: '{{repoUrl}}/tree/main/{{projectName}}-docs/',
+          {{#if editUrl}}editUrl: '{{editUrl}}',{{/if}}
         },
         blog: {
           showReadingTime: true,
           feedOptions: { type: ['rss', 'atom'], xslt: true },
-          editUrl: '{{repoUrl}}/tree/main/{{projectName}}-docs/',
+          {{#if editUrl}}editUrl: '{{editUrl}}',{{/if}}
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -76,7 +76,7 @@ const config: Config = {
         { type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Docs' },
         { to: '/blog', label: 'Blog', position: 'left' },
         { to: '/roadmap', label: 'Roadmap', position: 'left' },
-        {{#if repoUrl}}{ href: '{{repoUrl}}', label: 'GitHub', position: 'right' },{{/if}}
+        {{#if repoUrl}}{ href: '{{repoUrl}}', label: 'Code', position: 'right' },{{/if}}
       ],
     },
     footer: {
@@ -90,7 +90,7 @@ const config: Config = {
           title: 'Community',
           items: [
             { label: 'Discord', href: 'https://discord.gg/freemocap' },
-            {{#if repoUrl}}{ label: 'GitHub Discussions', href: '{{repoUrl}}/discussions' },{{/if}}
+            {{#if repoUrl}}{ label: 'Source Code', href: '{{repoUrl}}' },{{/if}}
             { label: 'FreeMoCap', href: 'https://freemocap.org' },
           ],
         },
@@ -98,7 +98,7 @@ const config: Config = {
           title: 'More',
           items: [
             { label: 'Blog', to: '/blog' },
-            {{#if repoUrl}}{ label: 'GitHub', href: '{{repoUrl}}' },{{/if}}
+            {{#if projectUrl}}{ label: 'Website', href: '{{projectUrl}}' },{{/if}}
           ],
         },
       ],

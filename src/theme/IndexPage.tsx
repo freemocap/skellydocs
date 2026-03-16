@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
-import TodoList from "./TodoList.js";
+import LinkedIssues from "./LinkedIssues.js";
 import styles from "../css/theme.module.css";
 import type { SkellyDocsConfig } from "../types.js";
 
@@ -53,10 +53,8 @@ function HeroSection({
 
 function FeaturesSection({
   config,
-  repoUrl,
 }: {
   config: SkellyDocsConfig;
-  repoUrl: string;
 }) {
   return (
     <div className={styles.features}>
@@ -68,8 +66,8 @@ function FeaturesSection({
               <h3 className={styles.featureTitle}>{f.title}</h3>
               <div className={styles.featureDescription}>{f.summary}</div>
             </Link>
-            {f.todos.length > 0 && (
-              <TodoList items={f.todos} repoUrl={repoUrl} />
+            {f.issues.length > 0 && (
+              <LinkedIssues items={f.issues} />
             )}
           </div>
         ))}
@@ -80,10 +78,8 @@ function FeaturesSection({
 
 function GuaranteesSection({
   config,
-  repoUrl,
 }: {
   config: SkellyDocsConfig;
-  repoUrl: string;
 }) {
   return (
     <div className={styles.guarantees}>
@@ -99,9 +95,9 @@ function GuaranteesSection({
           </div>
         ))}
       </div>
-      {config.guaranteeTodos.length > 0 && (
+      {config.guaranteeIssues.length > 0 && (
         <div className={styles.guaranteesRoadmap}>
-          <TodoList items={config.guaranteeTodos} repoUrl={repoUrl} />
+          <LinkedIssues items={config.guaranteeIssues} />
         </div>
       )}
     </div>
@@ -114,12 +110,9 @@ function GuaranteesSection({
  */
 export default function IndexPage({
   config,
-  repo,
 }: {
   config: SkellyDocsConfig;
-  repo: string;
 }): ReactNode {
-  const repoUrl = `https://github.com/${repo}`;
   return (
     <Layout
       title="Home"
@@ -127,8 +120,8 @@ export default function IndexPage({
     >
       <main className={styles.main}>
         <HeroSection config={config} />
-        <FeaturesSection config={config} repoUrl={repoUrl} />
-        <GuaranteesSection config={config} repoUrl={repoUrl} />
+        <FeaturesSection config={config} />
+        <GuaranteesSection config={config} />
       </main>
     </Layout>
   );

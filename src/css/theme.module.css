@@ -42,9 +42,9 @@
 }
 
 
-/* ── TodoList (collapsible roadmap linking to GitHub issues) ── */
+/* ── LinkedIssues (collapsible section linking to issues/PRs) ── */
 
-.todoSection {
+.linkedIssueSection {
   position: relative;
   z-index: 1;
   margin-top: 1rem;
@@ -52,7 +52,7 @@
   border-top: 1px solid rgba(26, 23, 48, 0.6);
 }
 
-.todoToggle {
+.linkedIssueToggle {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -66,25 +66,25 @@
   letter-spacing: 0.04em;
   transition: color 0.15s;
 }
-.todoToggle:hover {
+.linkedIssueToggle:hover {
   color: var(--sk-accent);
 }
 
-.todoChevron {
+.linkedIssueChevron {
   display: inline-block;
   transition: transform 0.2s ease;
   font-size: 0.7rem;
 }
-.todoChevron[data-open='true'] {
+.linkedIssueChevron[data-open='true'] {
   transform: rotate(90deg);
 }
 
-.todoLabel {
+.linkedIssueLabel {
   text-transform: uppercase;
   font-weight: 600;
 }
 
-.todoBadge {
+.linkedIssueBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -98,7 +98,7 @@
   padding: 0 0.3rem;
 }
 
-.todoItems {
+.linkedIssueItems {
   margin: 0.4rem 0 0;
   padding: 0;
   display: flex;
@@ -106,12 +106,12 @@
   gap: 0.25rem;
 }
 
-.todoItem {
+.linkedIssueItem {
   margin: 0;
   padding: 0;
 }
 
-.todoLink {
+.linkedIssueLink {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -123,25 +123,25 @@
   transition: all 0.15s ease;
   line-height: 1.4;
 }
-.todoLink:hover {
+.linkedIssueLink:hover {
   color: var(--sk-accent);
   background: rgba(110, 231, 183, 0.05);
   text-decoration: none;
 }
 
-.todoIcon {
+.linkedIssueIcon {
   color: var(--sk-purple);
   font-size: 0.65rem;
   flex-shrink: 0;
 }
 
-.todoArrow {
+.linkedIssueArrow {
   margin-left: auto;
   font-size: 0.7rem;
   opacity: 0;
   transition: opacity 0.15s;
 }
-.todoLink:hover .todoArrow {
+.linkedIssueLink:hover .linkedIssueArrow {
   opacity: 1;
 }
 
@@ -770,6 +770,19 @@
   opacity: 0.7;
 }
 
+.roadmapPinnedBadge {
+  font-family: var(--sk-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
 .roadmapCardNumber {
   color: var(--sk-text-dim);
   opacity: 0.5;
@@ -828,6 +841,119 @@
 .roadmapCard:hover .roadmapCardArrow {
   opacity: 1;
   color: var(--sk-accent);
+}
+
+/* ── Collapsible info section ── */
+
+.roadmapDetails {
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--sk-border);
+  border-radius: 8px;
+  background: rgba(14, 12, 26, 0.4);
+  overflow: hidden;
+}
+
+.roadmapDetailsSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sk-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--sk-text-dim);
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color 0.15s;
+}
+.roadmapDetailsSummary::-webkit-details-marker {
+  display: none;
+}
+.roadmapDetailsSummary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent currentColor;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.roadmapDetails[open] > .roadmapDetailsSummary::before {
+  transform: rotate(90deg);
+}
+.roadmapDetailsSummary:hover {
+  color: var(--sk-text);
+}
+
+/* Nested details inside the body */
+.roadmapDetailsBody details {
+  margin-top: 0.5rem;
+  border: 1px solid var(--sk-border);
+  border-radius: 6px;
+  background: rgba(14, 12, 26, 0.3);
+}
+.roadmapDetailsBody details summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--sk-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--sk-text-dim);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color 0.15s;
+}
+.roadmapDetailsBody details summary::-webkit-details-marker {
+  display: none;
+}
+.roadmapDetailsBody details summary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 3px 0 3px 5px;
+  border-color: transparent transparent transparent currentColor;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.roadmapDetailsBody details[open] > summary::before {
+  transform: rotate(90deg);
+}
+.roadmapDetailsBody details summary:hover {
+  color: var(--sk-text);
+}
+.roadmapDetailsBody details > div {
+  padding: 0 0.75rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.roadmapDetailsBody {
+  padding: 0 1rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--sk-text-dim);
+  line-height: 1.6;
+}
+.roadmapDetailsBody p {
+  margin: 0 0 0.5rem;
+}
+.roadmapDetailsBody p:last-child {
+  margin-bottom: 0;
+}
+.roadmapDetailsBody code {
+  font-family: var(--sk-mono);
+  font-size: 0.72rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(167, 139, 250, 0.1);
+  color: var(--sk-purple);
 }
 
 /* ── Loading ── */

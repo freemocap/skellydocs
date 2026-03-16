@@ -1,18 +1,16 @@
 import { type MouseEvent, useState } from "react";
 import styles from "../css/theme.module.css";
-import type { TodoItem } from "../types.js";
+import type { LinkedIssue } from "../types.js";
 
 /**
- * Collapsible "Roadmap" section that links each item to a GitHub issue.
+ * Collapsible section that links each item to an issue or PR.
  * Uses divs instead of ul/li to avoid Docusaurus `.markdown` list style conflicts.
  * Stops event propagation so parent Link wrappers don't intercept clicks.
  */
-export default function TodoList({
+export default function LinkedIssues({
   items,
-  repoUrl,
 }: {
-  items: TodoItem[];
-  repoUrl: string;
+  items: LinkedIssue[];
 }) {
   const [open, setOpen] = useState(false);
 
@@ -28,34 +26,34 @@ export default function TodoList({
 
   return (
     <div
-      className={styles.todoSection}
+      className={styles.linkedIssueSection}
       onClick={(e: MouseEvent) => e.stopPropagation()}
     >
       <button
-        className={styles.todoToggle}
+        className={styles.linkedIssueToggle}
         onClick={handleToggle}
         aria-expanded={open}
       >
-        <span className={styles.todoChevron} data-open={open}>
+        <span className={styles.linkedIssueChevron} data-open={open}>
           ▸
         </span>
-        <span className={styles.todoLabel}>Roadmap</span>
-        <span className={styles.todoBadge}>{items.length}</span>
+        <span className={styles.linkedIssueLabel}>Linked Issues</span>
+        <span className={styles.linkedIssueBadge}>{items.length}</span>
       </button>
       {open && (
-        <div className={styles.todoItems}>
+        <div className={styles.linkedIssueItems}>
           {items.map((t) => (
-            <div key={t.issueNum} className={styles.todoItem}>
+            <div key={t.url} className={styles.linkedIssueItem}>
               <a
-                href={`${repoUrl}/issues/${t.issueNum}`}
+                href={t.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.todoLink}
+                className={styles.linkedIssueLink}
                 onClick={handleItemClick}
               >
-                <span className={styles.todoIcon}>◇</span>
+                <span className={styles.linkedIssueIcon}>◇</span>
                 {t.label}
-                <span className={styles.todoArrow}>↗</span>
+                <span className={styles.linkedIssueArrow}>↗</span>
               </a>
             </div>
           ))}
@@ -65,4 +63,4 @@ export default function TodoList({
   );
 }
 
-export type { TodoItem };
+export type { LinkedIssue };
