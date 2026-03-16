@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import Layout from "@theme/Layout";
 import LinkedIssues from "./LinkedIssues.js";
 import styles from "../css/theme.module.css";
@@ -11,12 +12,13 @@ function HeroSection({
   config: SkellyDocsConfig;
 }) {
   const { hero } = config;
+  const logoUrl = useBaseUrl(hero.logoSrc);
   return (
     <div className={styles.hero}>
       <div className={styles.heroGlow} />
       <div className={styles.heroContent}>
         <img
-          src={hero.logoSrc}
+          src={logoUrl}
           alt={hero.title}
           className={styles.heroLogo}
         />

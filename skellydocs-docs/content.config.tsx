@@ -6,7 +6,7 @@ const config: SkellyDocsConfig = {
         accentedSuffix: 'skellydocs',
         subtitle: 'Part of the FreeMoCap ecosystem',
         tagline: 'Add your project tagline here',
-        logoSrc: '/skellydocs/img/logo.svg',
+        logoSrc: '/img/logo.svg',
         parentProject: {
             name: 'FreeMoCap',
             url: 'https://freemocap.org',
