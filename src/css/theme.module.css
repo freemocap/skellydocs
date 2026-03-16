@@ -227,8 +227,8 @@
 }
 
 .heroLogo {
-  width: 96px;
-  height: 96px;
+  width: 200px;
+  height: 200px;
   margin-bottom: 1.5rem;
   filter: drop-shadow(0 0 32px rgba(110, 231, 183, 0.25));
   animation: logoFloat 6s ease-in-out infinite;

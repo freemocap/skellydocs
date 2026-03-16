@@ -26,6 +26,10 @@ declare module "@theme/Layout" {
   }): JSX.Element;
 }
 
+declare module "@docusaurus/useBaseUrl" {
+  export default function useBaseUrl(url: string): string;
+}
+
 declare module "@docusaurus/Translate" {
   import type { ReactNode } from "react";
   export default function Translate(props: {
