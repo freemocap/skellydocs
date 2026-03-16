@@ -21,7 +21,7 @@ export default function CoreFeatureHeader({
         <span className={styles.featureHeaderIcon}>{feature.icon}</span>
         <div className={styles.featureHeaderText}>{feature.summary}</div>
       </div>
-      {feature.issues.length > 0 && (
+      {feature.issues?.length > 0 && (
         <LinkedIssues items={feature.issues} />
       )}
     </div>

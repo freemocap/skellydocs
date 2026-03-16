@@ -66,7 +66,7 @@ function FeaturesSection({
               <h3 className={styles.featureTitle}>{f.title}</h3>
               <div className={styles.featureDescription}>{f.summary}</div>
             </Link>
-            {f.issues.length > 0 && (
+            {f.issues?.length > 0 && (
               <LinkedIssues items={f.issues} />
             )}
           </div>
