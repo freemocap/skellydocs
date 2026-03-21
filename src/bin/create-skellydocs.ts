@@ -106,9 +106,16 @@ async function promptUser(): Promise<UserInput> {
     PROMPTS_CANCEL,
   );
 
+  // Normalize bare "org/repo" slugs into full GitHub URLs
+  let normalizedRepoUrl = (repoUrl as string).trim();
+  if (normalizedRepoUrl && !normalizedRepoUrl.includes("://")) {
+    // Looks like "org/repo" or "org/repo" — prepend GitHub URL
+    normalizedRepoUrl = `https://github.com/${normalizedRepoUrl}`;
+  }
+
   return {
     projectName: (projectName as string).trim(),
-    repoUrl: (repoUrl as string).trim(),
+    repoUrl: normalizedRepoUrl,
     projectUrl: (projectUrl as string).trim(),
     logoPath: (logoPath as string).trim(),
   };

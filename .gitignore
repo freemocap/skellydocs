@@ -104,8 +104,9 @@ dist
 # vitepress cache directory
 **/.vitepress/cache
 
-# Docusaurus cache and generated files
+# Docusaurus cache, generated files, and build output
 .docusaurus
+**/build/
 
 # Serverless directories
 .serverless/
