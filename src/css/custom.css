@@ -21,7 +21,7 @@
   --sk-bg-surface: #0e0c1a;
   --sk-border: #1a1730;
   --sk-text: #e8e6f0;
-  --sk-text-dim: #8a87a0;
+  --sk-text-dim: #b0aec3;
   --sk-accent: #6ee7b7;
   --sk-accent-dim: rgba(110, 231, 183, 0.15);
   --sk-purple: #a78bfa;
@@ -58,6 +58,18 @@
 .menu__link--active:not(.menu__link--sublist) {
   border-left: 3px solid var(--ifm-color-primary);
   padding-left: calc(var(--ifm-menu-link-padding-horizontal) - 3px);
+}
+
+/* ── Top-level sidebar category styling ── */
+.menu__list > .menu__list-item > .menu__link--sublist {
+  border-left: 3px solid var(--sk-accent);
+  background: rgba(110, 231, 183, 0.05);
+  font-weight: 600;
+  border-radius: 0 var(--ifm-menu-link-border-radius) var(--ifm-menu-link-border-radius) 0;
+}
+
+.menu__list > .menu__list-item > .menu__link--sublist:hover {
+  background: rgba(110, 231, 183, 0.1);
 }
 
 [data-theme='dark'] .prism-code {

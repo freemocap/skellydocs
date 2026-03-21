@@ -26,11 +26,22 @@ export type RoadmapItem = {
 
 export type SortKey = "updated" | "newest" | "oldest";
 
+// ── AI-generated banner ──
+
+export type GenerationType =
+  | "ai-generated"
+  | "ai-human-curated"
+  | "human-sourced-ai"
+  | "human-generated";
+
 // ── Linked issue (used by LinkedIssues component and feature cards) ──
 
 export type LinkedIssue = {
   label: string;
   url: string;
+  status?: ItemStatus;
+  type?: ItemType;
+  labels?: GitHubLabel[];
 };
 
 // ── Core feature (used by index page cards and doc headers) ──

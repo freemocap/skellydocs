@@ -5,6 +5,95 @@
    ================================================================ */
 
 
+/* ── AI Generated Banner (collapsible, like About This Roadmap) ── */
+
+.aiBanner {
+  margin-bottom: 1.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  background: rgba(167, 139, 250, 0.04);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--sk-text-dim);
+}
+
+.aiBannerSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.aiBannerSummary::-webkit-details-marker {
+  display: none;
+}
+
+.aiBannerSummary::before {
+  content: '▸';
+  font-size: 0.7rem;
+  color: var(--sk-purple);
+  transition: transform 0.15s;
+}
+
+.aiBanner[open] > .aiBannerSummary::before {
+  transform: rotate(90deg);
+}
+
+.aiBannerSummary:hover {
+  background: rgba(167, 139, 250, 0.06);
+  border-radius: 6px;
+}
+
+.aiBannerIcon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.aiBannerTypeBadge {
+  font-family: var(--sk-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: var(--sk-purple-dim);
+  color: var(--sk-purple);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.aiBannerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.25rem 1rem 0.6rem 2.2rem;
+}
+
+.aiBannerDetailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--sk-text-dim);
+}
+
+.aiBannerHumanNotes {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--sk-accent);
+  font-size: 0.75rem;
+  color: var(--sk-text-dim);
+  background: rgba(110, 231, 183, 0.04);
+  border-radius: 0 6px 6px 0;
+}
+
 /* ── Tip (inline tooltip for progressive disclosure) ── */
 
 .tip {
@@ -39,6 +128,89 @@
 .tip:hover::after {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* ── Tip: two-stage progressive tooltip ── */
+
+.tipWrapper {
+  position: relative;
+  border-bottom: 1px dotted var(--sk-purple);
+  cursor: help;
+  display: inline;
+}
+
+.tipTooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sk-border);
+  color: var(--sk-text);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  width: max-content;
+  max-width: 300px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+}
+
+/* Invisible bridge between tooltip and trigger text so mouse
+   can travel upward without leaving the hover zone */
+.tipTooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+.tipTooltipExpanded {
+  max-width: 500px;
+}
+
+.tipText {
+  margin: 0;
+}
+
+.tipToggle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border: none;
+  color: var(--sk-accent);
+  font-family: var(--sk-mono);
+  font-size: 0.68rem;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  margin-top: 0.3rem;
+}
+
+.tipToggle:hover {
+  text-decoration: underline;
+}
+
+.tipLongText {
+  margin: 0.4rem 0 0;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+.tipLearnMoreLink {
+  color: var(--sk-accent);
+  font-family: var(--sk-mono);
+  font-size: 0.68rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tipLearnMoreLink:hover {
+  text-decoration: underline;
 }
 
 
@@ -145,6 +317,22 @@
   opacity: 1;
 }
 
+.linkedIssueMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+}
+
+.linkedIssueLabelChips {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.35rem;
+  flex-shrink: 0;
+}
+
 
 /* ── CoreFeatureHeader (summary block at top of core doc pages) ── */
 
@@ -227,11 +415,18 @@
 }
 
 .heroLogo {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   margin-bottom: 1.5rem;
   filter: drop-shadow(0 0 32px rgba(110, 231, 183, 0.25));
   animation: logoFloat 6s ease-in-out infinite;
+}
+
+@media (max-width: 520px) {
+  .heroLogo {
+    width: 250px;
+    height: 250px;
+  }
 }
 
 @keyframes logoFloat {
@@ -267,7 +462,6 @@
   margin: 0 0 1.5rem;
   line-height: 1.5;
   font-weight: 400;
-  opacity: 0.7;
 }
 
 .heroLink {
@@ -698,6 +892,37 @@
   margin: 0 0 1rem;
 }
 
+/* ── View toggle ── */
+
+.roadmapViewToggle {
+  display: flex;
+  gap: 0.2rem;
+  margin-left: 0.5rem;
+}
+
+.roadmapViewBtn {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--sk-border);
+  background: none;
+  color: var(--sk-text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.roadmapViewBtn:hover {
+  border-color: var(--sk-purple);
+  color: var(--sk-text);
+}
+
+.roadmapViewBtnActive {
+  border-color: var(--sk-purple);
+  background: var(--sk-purple-dim);
+  color: var(--sk-purple);
+}
+
 /* ── Card grid ── */
 
 .roadmapGrid {
@@ -710,6 +935,14 @@
   .roadmapGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Card list (single column) ── */
+
+.roadmapList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 /* ── Roadmap card ── */
@@ -767,7 +1000,6 @@
 .roadmapStatusClosed {
   color: var(--sk-text-dim);
   font-size: 0.7rem;
-  opacity: 0.7;
 }
 
 .roadmapPinnedBadge {
@@ -785,14 +1017,14 @@
 
 .roadmapCardNumber {
   color: var(--sk-text-dim);
-  opacity: 0.5;
+  opacity: 0.7;
   font-family: var(--sk-mono);
 }
 
 .roadmapCardDate {
   margin-left: auto;
   color: var(--sk-text-dim);
-  opacity: 0.5;
+  opacity: 0.7;
   font-family: var(--sk-mono);
 }
 

@@ -9,6 +9,7 @@ export type {
   ItemType,
   ItemStatus,
   SortKey,
+  GenerationType,
 } from "./types.js";
 
 // ── Theme components (re-exported for use in consuming repos) ──

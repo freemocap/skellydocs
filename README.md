@@ -1,29 +1,27 @@
 # @freemocap/skellydocs
 
-Shared [Docusaurus](https://docusaurus.io/) theme, preset, and CLI for [FreeMoCap](https://freemocap.org) documentation sites.
+[![npm](https://img.shields.io/npm/v/@freemocap/skellydocs)](https://www.npmjs.com/package/@freemocap/skellydocs)
 
-Every FreeMoCap sub-project — SkellyCam, SkellyTracker, FreeMoCap core — gets the same dark-theme design, GitHub-integrated roadmap, interactive feature cards, and i18n setup without duplicating a single component or CSS file. Each repo's docs folder contains **only content**: markdown, images, and a thin config. Everything else comes from this package.
+Shared [Docusaurus](https://docusaurus.io/) theme and CLI for [FreeMoCap](https://freemocap.org) documentation sites.
+
+Every FreeMoCap sub-project — SkellyCam, SkellyTracker, FreeMoCap core — gets the same dark-theme design, GitHub-integrated roadmap, interactive feature cards, and progressive-disclosure tooltips without duplicating a single component or CSS file. Each repo's docs folder contains **only content**: markdown, images, and a thin config. Everything else comes from this package.
 
 ## What's in the box
 
-**Preset** — `skellyPreset()` wraps `@docusaurus/preset-classic` with the theme's CSS, dark mode defaults, edit-URL wiring, mermaid support, and blog/docs configuration. One function call replaces ~100 lines of boilerplate config.
-
-**Theme components** — A set of React components that all FreeMoCap docs sites share:
+**Theme components** — React components that all FreeMoCap docs sites share:
 
 | Component | What it does |
 |---|---|
 | `IndexPage` | Full landing page: hero section, feature cards, project guarantees |
-| `RoadmapPage` | `/roadmap` route — fetches GitHub issues by label, displays filterable cards |
-| `RoadmapContent` | The roadmap dashboard (fetch, cache, filter, search, sort) |
+| `RoadmapPage` | `/roadmap` route — fetches GitHub issues, displays filterable/sortable cards with grid and list views |
+| `RoadmapContent` | The roadmap dashboard (fetch, cache, filter, search, sort, grid/list toggle) |
 | `RoadmapEntry` | A single roadmap item card with type/status badges and labels |
 | `CoreFeatureHeader` | Summary block for the top of core feature doc pages |
-| `TodoList` | Collapsible "Roadmap" toggle that links items to GitHub issues |
-| `Tip` | Inline tooltip for progressive disclosure (hover to reveal explanation) |
-| `AiGeneratedBanner` | Disclaimer banner for AI-drafted doc pages |
+| `LinkedIssues` | Displays linked GitHub issues with type badges, status dots, and label chips (fetched from GitHub API) |
+| `Tip` | Two-stage progressive tooltip — hover shows short info, click expands to show full details with optional "Learn more" link |
+| `AiGeneratedBanner` | Collapsible disclaimer banner for AI-drafted doc pages — supports generation types, metadata, and human-curator notes |
 
 **CSS design tokens** — `--sk-*` CSS variables that define the palette, plus a full `theme.module.css` with styles for every component. Override `--sk-accent` in your own CSS to give each project its own color identity.
-
-**i18n helpers** — `defaultLocales()` generates Docusaurus i18n config with human-readable directory names (`i18n/es-spanish/` instead of `i18n/es/`). Starts with English, Spanish, Arabic (RTL), and Chinese.
 
 **CLI scaffolder** — `npx @freemocap/skellydocs init` interactively creates a new docs site with all the wiring done.
 
@@ -40,12 +38,14 @@ You'll be prompted for your project name, GitHub repo, and base URL. The CLI gen
 ```
 docs-site/
 ├── docs/
-│   └── intro.md
+│   └── intro.mdx
+├── blog/
+│   └── init.mdx
 ├── src/pages/
 │   ├── index.tsx          # 5-line wrapper around IndexPage
 │   └── roadmap.tsx        # 4-line wrapper around RoadmapPage
 ├── content.config.tsx     # Your project's features, hero, guarantees
-├── docusaurus.config.ts   # ~25 lines, delegates to the preset
+├── docusaurus.config.ts   # Full Docusaurus config with skellydocs CSS
 ├── sidebars.ts
 └── package.json
 ```
@@ -64,84 +64,117 @@ npm start
 npm install @freemocap/skellydocs
 ```
 
-## How it works: skellydocs by example
+Then wire up the theme CSS in your `docusaurus.config.ts`:
 
-The best way to understand the package is to see how a consuming repo uses it. Here's exactly what SkellyCam's docs look like after adopting skellydocs.
+```typescript
+theme: {
+  customCss: [require.resolve('@freemocap/skellydocs/css/custom.css')],
+},
+```
+
+## How it works
+
+The best way to understand the package is to see how a consuming docs site uses it. The CLI generates all of this for you, but here's what each file looks like.
 
 ### docusaurus.config.ts
 
-The preset eliminates boilerplate. The consumer imports `prism-react-renderer` directly and passes themes to `skellyThemeConfig`; everything else has sensible defaults.
+The generated config uses `@docusaurus/preset-classic` with the skellydocs CSS applied as custom CSS. It includes dark mode defaults, mermaid support, and the "Built with SkellyDocs" footer.
 
 ```typescript
 import { themes as prismThemes } from 'prism-react-renderer';
-import { skellyPreset, skellyThemeConfig, defaultLocales } from '@freemocap/skellydocs/preset';
 import type { Config } from '@docusaurus/types';
 
 const config: Config = {
-  title: 'SkellyCam',
-  tagline: 'Frame-perfect multi-camera synchronization for USB webcams',
-  favicon: 'img/skellycam-favicon.ico',
-  url: 'https://freemocap.github.io',
-  baseUrl: '/skellycam/',
+  title: 'MyProject',
+  tagline: 'Documentation for MyProject',
+  favicon: 'img/favicon.ico',
 
-  future: { v4: true },
+  url: 'https://docs.freemocap.org',
+  baseUrl: '/myproject/',
+
   onBrokenLinks: 'throw',
   markdown: { mermaid: true },
   themes: ['@docusaurus/theme-mermaid'],
 
-  i18n: defaultLocales(),
-
-  presets: [
-    skellyPreset({
-      repo: 'freemocap/skellycam',
-    }),
+  plugins: [
+    function disableFullySpecified() {
+      return {
+        name: 'disable-fully-specified',
+        configureWebpack() {
+          return {
+            module: {
+              rules: [{ test: /\.m?js$/, resolve: { fullySpecified: false } }],
+            },
+          };
+        },
+      };
+    },
   ],
 
-  themeConfig: skellyThemeConfig({
-    title: 'SkellyCam',
-    repo: 'freemocap/skellycam',
-    prismThemes: {
-      light: prismThemes.github,
-      dark: prismThemes.dracula,
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          sidebarPath: require.resolve('./sidebars.ts'),
+          routeBasePath: 'docs',
+          editUrl: 'https://github.com/freemocap/myproject/tree/main/myproject-docs/',
+        },
+        blog: {
+          showReadingTime: true,
+          feedOptions: { type: ['rss', 'atom'], xslt: true },
+        },
+        theme: {
+          customCss: [require.resolve('@freemocap/skellydocs/css/custom.css')],
+        },
+      },
+    ],
+  ],
+
+  themeConfig: {
+    colorMode: { defaultMode: 'dark', respectPrefersColorScheme: true },
+    navbar: {
+      title: 'MyProject',
+      logo: { alt: 'MyProject Logo', src: 'img/logo.svg' },
+      items: [
+        { type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Docs' },
+        { to: '/blog', label: 'Blog', position: 'left' },
+        { to: '/roadmap', label: 'Roadmap', position: 'left' },
+        { href: 'https://github.com/freemocap/myproject', label: 'Code', position: 'right' },
+      ],
     },
-    logoSrc: 'img/skellycam-logo.svg',
-  }),
+    footer: {
+      style: 'dark',
+      copyright: `Copyright © ${new Date().getFullYear()} FreeMoCap Foundation. Built with <a href="https://github.com/freemocap/skellydocs" target="_blank" rel="noopener noreferrer">SkellyDocs</a>.`,
+      // ... links
+    },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+      additionalLanguages: ['bash', 'json', 'python', 'typescript'],
+    },
+  },
 };
 
 export default config;
 ```
 
-`skellyPreset()` takes a `SkellyPresetOptions` object:
-
-| Option | Required | Description |
-|---|---|---|
-| `repo` | yes | GitHub `org/repo` string — used for edit links, roadmap API calls, issue links |
-
-`skellyThemeConfig()` takes:
-
-| Option | Required | Default | Description |
-|---|---|---|---|
-| `title` | yes | — | Displayed in the navbar |
-| `repo` | yes | — | GitHub `org/repo` — navbar GitHub link and footer links |
-| `prismThemes` | yes | — | `{ light, dark }` theme objects from `prism-react-renderer` |
-| `logoSrc` | no | `"img/logo.svg"` | Path to the navbar logo (relative to `static/`) |
-| `logoAlt` | no | `"<title> Logo"` | Alt text for the navbar logo |
+> **Note:** The `disableFullySpecified` plugin is required because tsup/esbuild strips `.js` extensions in unbundled output, and webpack 5 enforces full file extensions on ESM imports.
 
 ### content.config.tsx
 
-Each repo defines its own landing page content in a typed config file. This is the structured data that drives the `IndexPage` component — hero text, feature cards, guarantees, and links to GitHub issues.
+Each repo defines its own landing page content in a typed config file. This drives the `IndexPage` component — hero text, feature cards, guarantees, and links to GitHub issues.
 
 ```tsx
 import type { SkellyDocsConfig } from '@freemocap/skellydocs';
-import { Tip } from '@freemocap/skellydocs';
 
 const config: SkellyDocsConfig = {
   hero: {
-    title: 'SkellyCam',
-    accentedSuffix: 'Cam',
-    subtitle: 'The camera backend for FreeMoCap',
-    tagline: 'Frame-perfect multi-camera synchronization for USB webcams',
-    logoSrc: '/skellycam/img/skellycam-logo.svg',
+    title: 'MyProject',
+    accentedSuffix: 'Project',
+    subtitle: 'Part of the FreeMoCap ecosystem',
+    tagline: 'Add your project tagline here',
+    logoSrc: '/myproject/img/logo.svg',
     parentProject: {
       name: 'FreeMoCap',
       url: 'https://freemocap.org',
@@ -150,43 +183,25 @@ const config: SkellyDocsConfig = {
 
   features: [
     {
-      id: 'frame-perfect-sync',
-      icon: '🔒',
-      title: 'Frame-Perfect Sync',
-      description: 'A frame-count-gated capture protocol ensures all cameras stay in lock-step.',
-      summary: (
-        <>
-          A{' '}
-          <Tip text="Each camera's grab cycle is gated on relative frame counts">
-            frame-count-gated capture protocol
-          </Tip>{' '}
-          ensures all cameras stay in lock-step with{' '}
-          <strong>identical frame counts</strong>.
-        </>
-      ),
-      todos: [
-        { label: 'Hardware synchronization (external trigger)', issueNum: 1 },
-        { label: 'Target frame rate setting', issueNum: 2 },
-      ],
-      docPath: 'core/frame-perfect-sync',
+      id: 'example-feature',
+      icon: '🚀',
+      title: 'Example Feature',
+      description: 'Describe what this feature does.',
+      summary: <>Describe what this feature does in a sentence or two.</>,
+      issues: [],        // LinkedIssue[] — links to GitHub issues
+      docPath: 'intro',  // route to the feature's doc page
     },
-    // ...more features
   ],
 
   guarantees: [
-    'All recorded videos have <strong>precisely the same frame count</strong>',
-    'Each multi-frame payload contains <strong>exactly one image per camera</strong>',
+    'Add your project guarantees here',
   ],
 
-  guaranteeTodos: [
-    { label: 'Crash-safe recordings (hybrid MP4 codec)', issueNum: 12 },
-  ],
+  guaranteeIssues: [],   // LinkedIssue[] — issues linked to guarantees
 };
 
 export default config;
 ```
-
-The `Tip` component is imported directly from the package — no custom component authoring needed. Feature summaries support full TSX markup.
 
 ### src/pages/index.tsx
 
@@ -196,72 +211,68 @@ The landing page is a one-liner wrapper. All the rendering logic lives in the pa
 import { IndexPage } from '@freemocap/skellydocs';
 import config from '../../content.config';
 
-const REPO = 'freemocap/skellycam';
-
 export default function Home() {
-  return <IndexPage config={config} repo={REPO} />;
+  return <IndexPage config={config} />;
 }
 ```
 
 ### src/pages/roadmap.tsx
 
-Same pattern for the roadmap:
+Same pattern for the roadmap. `collectLinkedUrls` gathers all issue URLs from your `content.config.tsx` and pins them at the top of the roadmap.
 
 ```tsx
-import { RoadmapPage } from '@freemocap/skellydocs';
+import { RoadmapPage, collectLinkedUrls } from '@freemocap/skellydocs';
+import config from '../../content.config';
 
-const REPO = 'freemocap/skellycam';
+const REPO = 'freemocap/myproject';
 
 export default function Roadmap() {
-  return <RoadmapPage repo={REPO} />;
+  return <RoadmapPage repo={REPO} pinnedIssues={collectLinkedUrls(config)} />;
 }
 ```
 
-`RoadmapPage` fetches issues from GitHub's API using the repo slug, caches responses with ETags, and renders a filterable/sortable grid of cards. No configuration needed beyond the repo string.
+`RoadmapPage` fetches issues from GitHub's API using the repo slug, caches responses with ETags in localStorage, and renders a filterable/sortable grid (or list) of cards.
 
 ### Using components in MDX docs
 
-Theme components are available for use inside markdown/MDX pages too:
+Theme components are available for use inside `.mdx` pages:
 
 ```mdx
 ---
-title: Frame-Perfect Sync
+title: Introduction
 ---
 
-import { CoreFeatureHeader, Tip } from '@freemocap/skellydocs';
+import { AiGeneratedBanner, Tip } from '@freemocap/skellydocs';
 
-<CoreFeatureHeader
-  feature={{
-    id: 'frame-perfect-sync',
-    icon: '🔒',
-    title: 'Frame-Perfect Sync',
-    description: '...',
-    summary: <>...</>,
-    todos: [{ label: 'Hardware sync', issueNum: 1 }],
-    docPath: 'core/frame-perfect-sync',
-  }}
-  repoUrl="https://github.com/freemocap/skellycam"
-/>
+<AiGeneratedBanner />
 
-The capture protocol uses a
-<Tip text="OpenCV's VideoCapture.grab() acquires a frame without decoding it">
-  grab/retrieve split
-</Tip>
-to minimize inter-camera timing spread.
+# Welcome to MyProject
+
+This site is built with [Docusaurus](https://docusaurus.io/) and the
+<Tip
+  shortInfo="A shared Docusaurus theme package for FreeMoCap documentation sites."
+  longInfo="@freemocap/skellydocs provides pre-built components (IndexPage, RoadmapPage, Tip, AiGeneratedBanner), CSS design tokens, and a CLI scaffolder — so every FreeMoCap sub-project gets the same dark-theme design without duplicating code."
+  href="https://github.com/freemocap/skellydocs"
+>@freemocap/skellydocs</Tip> theme.
 ```
 
-## i18n
+#### Tip component
 
-`defaultLocales()` generates a Docusaurus i18n config with 4 starter locales and human-readable directory names:
+The `Tip` component supports two modes:
 
-| Locale code | Directory name | Why it's included |
+- **Legacy** (`text` prop): CSS-only hover tooltip
+- **Two-stage** (`shortInfo` + `longInfo` props): hover shows short info, click expands to show the full explanation. Optional `href` prop adds a "Learn more" link.
+
+#### AiGeneratedBanner component
+
+The banner is collapsible (collapsed by default) and supports optional props:
+
+| Prop | Type | Description |
 |---|---|---|
-| `en` | (default) | Base language |
-| `es` | `i18n/es-spanish/` | Latin script, LTR — simplest translation case |
-| `ar` | `i18n/ar-arabic/` | Tests RTL layout |
-| `zh-CN` | `i18n/zh-chinese/` | Tests character-based rendering |
-
-URLs stay clean (`/es/docs/intro`, not `/es-spanish/docs/intro`) because Docusaurus's `path` config maps the readable directory name to the standard locale code.
+| `generationType` | `"ai-generated" \| "ai-human-curated" \| "human-sourced-ai" \| "human-generated"` | Changes the summary text and badge |
+| `generatedAt` | `string` | Date the content was generated |
+| `model` | `string` | AI model used |
+| `humanNotes` | `string` | Curator notes shown in an accented blockquote |
 
 ## CSS design tokens
 
@@ -273,7 +284,7 @@ The theme defines `--sk-*` CSS variables in `custom.css`. All component styles r
 | `--sk-bg-surface` | `#0e0c1a` | Card/surface background |
 | `--sk-border` | `#1a1730` | Borders and dividers |
 | `--sk-text` | `#e8e6f0` | Primary text |
-| `--sk-text-dim` | `#8a87a0` | Secondary/muted text |
+| `--sk-text-dim` | `#b0aec3` | Secondary/muted text (WCAG AA compliant) |
 | `--sk-accent` | `#6ee7b7` | Accent color (override in your CSS to customize) |
 | `--sk-accent-dim` | `rgba(110,231,183,0.15)` | Accent background tint |
 | `--sk-purple` | `#a78bfa` | Secondary accent (links, badges) |
@@ -284,28 +295,101 @@ The theme defines `--sk-*` CSS variables in `custom.css`. All component styles r
 ```
 @freemocap/skellydocs/
 ├── src/
-│   ├── index.ts               # Package entry — re-exports everything
-│   ├── preset.ts              # skellyPreset() + skellyThemeConfig() + defaultLocales()
+│   ├── index.ts               # Package entry — re-exports components + types
 │   ├── types.ts               # All shared TypeScript types
 │   ├── bin/
-│   │   └── create-skellydocs.ts
+│   │   └── create-skellydocs.ts   # CLI scaffolder (Node.js only)
 │   ├── theme/
-│   │   ├── Tip.tsx
-│   │   ├── TodoList.tsx
-│   │   ├── CoreFeatureHeader.tsx
-│   │   ├── RoadmapEntry.tsx
-│   │   ├── RoadmapContent.tsx
-│   │   ├── IndexPage.tsx
-│   │   ├── RoadmapPage.tsx
-│   │   └── AiGeneratedBanner.tsx
+│   │   ├── Tip.tsx                # Two-stage progressive tooltip
+│   │   ├── LinkedIssues.tsx       # GitHub issue display with badges/labels
+│   │   ├── CoreFeatureHeader.tsx  # Feature page header block
+│   │   ├── RoadmapEntry.tsx       # Single roadmap card
+│   │   ├── RoadmapContent.tsx     # Roadmap dashboard with grid/list views
+│   │   ├── IndexPage.tsx          # Landing page
+│   │   ├── RoadmapPage.tsx        # Roadmap page wrapper
+│   │   ├── AiGeneratedBanner.tsx  # Collapsible AI disclaimer
+│   │   ├── collectLinkedUrls.ts   # Extract issue URLs from config
+│   │   └── githubUtils.ts        # Shared GitHub API fetch/cache utilities
 │   └── css/
-│       ├── custom.css
-│       └── theme.module.css
-├── templates/                 # Handlebars templates for the CLI
+│       ├── custom.css             # CSS design tokens (--sk-* variables)
+│       └── theme.module.css       # Component styles
+├── templates/                 # Handlebars templates for CLI scaffolder
+├── skellydocs-docs/           # Dogfood site (workspace member, see below)
 ├── package.json
 ├── tsconfig.json
 └── tsup.config.ts
 ```
+
+## Development
+
+### Workspace setup
+
+This is a monorepo. `skellydocs-docs/` is the dogfood docs site that uses the theme to document itself. It depends on the root package via `"@freemocap/skellydocs": "file:.."`.
+
+```bash
+npm install        # Sets up workspace links
+npm run build      # Build the theme package
+npm start -w skellydocs-docs   # Start the docs dev server
+```
+
+### Build commands
+
+```bash
+npm run build       # Build the theme package (must run before docs site)
+npm run dev         # Dev mode with watch
+npm run typecheck   # Type check
+```
+
+### Resetting the dogfood site
+
+The `skellydocs-docs/` directory should always be a **faithful representation of CLI output**. If you need to verify that the CLI produces a working site, or if the dogfood site has drifted from the templates:
+
+```bash
+# 1. Stop any running dev server first (Ctrl+C)
+
+# 2. Delete the dogfood site
+rm -rf skellydocs-docs
+# PowerShell:  Remove-Item -Recurse -Force skellydocs-docs
+# cmd.exe:     rmdir /s /q skellydocs-docs
+
+# 3. Build the theme package (so the CLI uses your latest changes)
+npm run build
+
+# 4. Scaffold a fresh dogfood site using the CLI
+node dist/bin/create-skellydocs.js
+
+#    When prompted, use these values:
+#      Project name:  skellydocs
+#      GitHub repo:   freemocap/skellydocs
+#      Site URL:      https://docs.freemocap.org
+#      Base URL:      /skellydocs/
+
+# 5. Clear any stale webpack caches
+rm -rf skellydocs-docs/.docusaurus skellydocs-docs/node_modules/.cache
+
+# 6. Re-install workspace links from the repo root
+npm install
+
+# 7. Start the dev server
+npm start -w skellydocs-docs
+```
+
+> **Important:** Always stop the dev server before deleting `skellydocs-docs/`. Running the CLI while a dev server is watching the directory can corrupt webpack's cache (`Cannot parse JSON: Unexpected end of JSON input`). If this happens, clear caches with step 5 above.
+
+> **Important:** Any edits you want to see in the dogfood site should be made in the **templates** (`templates/` directory), not directly in `skellydocs-docs/`. The dogfood site exists to prove the templates work correctly.
+
+## Updating an existing docs site
+
+To update a docs site that was previously scaffolded with an older version of skellydocs:
+
+```bash
+# In your docs site directory:
+npm install @freemocap/skellydocs@latest
+```
+
+All theme components, CSS tokens, and styles update automatically through the package. New component props (like `Tip`'s `shortInfo`/`longInfo` or `AiGeneratedBanner`'s `generationType`) are opt-in and backward compatible — existing sites continue to work without changes.
+
+To adopt new features, update your `.mdx` files to use the new props. See the component documentation above.
 
 ## Releasing
 
