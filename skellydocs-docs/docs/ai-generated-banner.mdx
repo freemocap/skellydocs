@@ -1,0 +1,115 @@
+---
+sidebar_position: 4
+title: AI Generated Banner
+---
+
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner generationType="ai-human-curated" />
+
+# AI Generated Banner
+
+The `AiGeneratedBanner` component provides transparent content provenance for documentation pages. It tells readers how a page was created — whether by AI, by a human, or some combination — and gives them a path to report issues.
+
+## Why use it
+
+FreeMoCap projects use AI assistants to help draft documentation. Being transparent about this builds trust with readers and makes it easy for them to flag inaccuracies. Every `.mdx` page in a skellydocs site should include the banner.
+
+## Basic usage
+
+Add the banner at the top of any `.mdx` file, after the frontmatter and imports:
+
+```mdx
+---
+title: My Page
+---
+
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
+# My Page
+```
+
+By default, the banner is **collapsed** and shows "AI-generated documentation" with an "AI GENERATED" badge. Clicking expands it to reveal a disclaimer and a link to open an issue.
+
+## Generation types
+
+The `generationType` prop controls the banner's text and badge. There are four levels:
+
+### `"ai-generated"` (default)
+
+The page was drafted entirely by AI with no human review.
+
+<AiGeneratedBanner generationType="ai-generated" />
+
+```mdx
+<AiGeneratedBanner />
+```
+
+### `"ai-human-curated"`
+
+AI drafted the page, then a human reviewed and edited it.
+
+<AiGeneratedBanner generationType="ai-human-curated" />
+
+```mdx
+<AiGeneratedBanner generationType="ai-human-curated" />
+```
+
+### `"human-sourced-ai"`
+
+A human provided source material (notes, outlines, specs), and AI generated the final page.
+
+<AiGeneratedBanner generationType="human-sourced-ai" />
+
+```mdx
+<AiGeneratedBanner generationType="human-sourced-ai" />
+```
+
+### `"human-generated"`
+
+The page was written entirely by a human. The banner still appears for consistency, but the text reflects human authorship.
+
+<AiGeneratedBanner generationType="human-generated" />
+
+```mdx
+<AiGeneratedBanner generationType="human-generated" />
+```
+
+## Metadata props
+
+You can add generation metadata that appears when the banner is expanded:
+
+```mdx
+<AiGeneratedBanner
+  generationType="ai-human-curated"
+  generatedAt="2026-03-15"
+  model="Claude Opus 4"
+  humanNotes="Reviewed for accuracy against the v2.0 API. Examples tested manually."
+/>
+```
+
+<AiGeneratedBanner
+  generationType="ai-human-curated"
+  generatedAt="2026-03-15"
+  model="Claude Opus 4"
+  humanNotes="Reviewed for accuracy against the v2.0 API. Examples tested manually."
+/>
+
+### Available props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `generationType` | `"ai-generated" \| "ai-human-curated" \| "human-sourced-ai" \| "human-generated"` | `"ai-generated"` | Controls the summary text, icon, and badge |
+| `generatedAt` | `string` | — | Date the content was generated (shown in expanded view) |
+| `model` | `string` | — | AI model used (shown in expanded view) |
+| `humanNotes` | `string` | — | Curator notes displayed in an accented blockquote |
+
+## Recommended workflow
+
+1. When AI drafts a page, use the default `<AiGeneratedBanner />`
+2. After a human reviews and edits, update to `<AiGeneratedBanner generationType="ai-human-curated" />`
+3. Optionally add `generatedAt`, `model`, and `humanNotes` for full traceability
+
+This creates a clear audit trail of how each page in your documentation was produced.

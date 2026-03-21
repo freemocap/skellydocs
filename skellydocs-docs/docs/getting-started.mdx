@@ -1,0 +1,114 @@
+---
+sidebar_position: 2
+title: Getting Started
+---
+
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
+# Getting Started
+
+Get a skellydocs site running in under 5 minutes.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v20 or later
+- A GitHub repository for your project
+
+## 1. Scaffold your site
+
+```bash
+npx @freemocap/skellydocs init
+```
+
+The CLI will prompt you for:
+
+| Prompt | Example | What it does |
+|---|---|---|
+| Project name | `skellycam` | Used in titles, navbar, and directory name |
+| GitHub repo | `freemocap/skellycam` | Wires up edit links, roadmap API, and issue links |
+| Site URL | `https://docs.freemocap.org` | The production URL for your docs |
+| Base URL | `/skellycam/` | The path prefix (must start and end with `/`) |
+
+This generates a complete docs site:
+
+```
+skellycam-docs/
+├── docs/
+│   └── intro.mdx
+├── blog/
+│   └── init.mdx
+├── src/pages/
+│   ├── index.tsx       # Landing page
+│   └── roadmap.tsx     # GitHub-powered roadmap
+├── content.config.tsx  # Hero, features, guarantees
+├── docusaurus.config.ts
+├── sidebars.ts
+└── package.json
+```
+
+## 2. Install and start
+
+```bash
+cd skellycam-docs
+npm install
+npm start
+```
+
+Your site is now running at `http://localhost:3000/skellycam/`.
+
+## 3. Customize your content
+
+Open `content.config.tsx` and update the hero section with your project's details:
+
+```tsx
+const config: SkellyDocsConfig = {
+  hero: {
+    title: 'SkellyCam',
+    accentedSuffix: 'Cam',           // The highlighted part of the title
+    subtitle: 'The camera backend for FreeMoCap',
+    tagline: 'Frame-perfect multi-camera synchronization',
+    logoSrc: '/skellycam/img/logo.svg',
+    parentProject: {
+      name: 'FreeMoCap',
+      url: 'https://freemocap.org',
+    },
+  },
+  // ...
+};
+```
+
+## 4. Add documentation
+
+Create `.mdx` files in the `docs/` directory. Every doc page should include the `AiGeneratedBanner`:
+
+```mdx
+---
+title: My New Page
+---
+
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
+# My New Page
+
+Your content here.
+```
+
+The sidebar is auto-generated from the file structure. Use `sidebar_position` in frontmatter to control ordering.
+
+## 5. Deploy
+
+```bash
+npm run build
+```
+
+The built site is in `build/`. Deploy it to GitHub Pages, Netlify, Vercel, or any static hosting.
+
+## Next steps
+
+- [**Tutorial**](tutorial) — Detailed walkthrough with more customization options
+- [**AI Generated Banner**](ai-generated-banner) — Configure content provenance tracking
+- [**GitHub Issues Integration**](github-issues) — Connect your roadmap to GitHub
