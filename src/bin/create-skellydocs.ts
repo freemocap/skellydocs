@@ -229,6 +229,11 @@ async function runInit(): Promise<void> {
   );
 
   writeFile(
+    path.join(targetDir, "docs", "ai-generated-banner.mdx"),
+    renderTemplate("docs/ai-generated-banner.mdx.hbs", templateData),
+  );
+
+  writeFile(
     path.join(targetDir, "blog", `${isoDate}_welcome.mdx`),
     renderTemplate("blog/init.mdx.hbs", templateData),
   );

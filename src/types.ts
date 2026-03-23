@@ -30,8 +30,7 @@ export type SortKey = "updated" | "newest" | "oldest";
 
 export type GenerationType =
   | "ai-generated"
-  | "ai-human-curated"
-  | "human-sourced-ai"
+  | "ai-transformatted"
   | "human-generated";
 
 // ── Linked issue (used by LinkedIssues component and feature cards) ──

@@ -94,6 +94,125 @@
   border-radius: 0 6px 6px 0;
 }
 
+.aiBannerCurated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--sk-accent);
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(110, 231, 183, 0.08);
+  white-space: nowrap;
+}
+
+.aiBannerCuratedEmpty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--sk-text-dim);
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.aiBannerMoreInfo {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--sk-purple);
+  text-decoration: none;
+}
+
+.aiBannerMoreInfo:hover {
+  text-decoration: underline;
+}
+
+.aiBannerTypeOverview {
+  margin-top: 0.5rem;
+  border-top: 1px solid rgba(167, 139, 250, 0.1);
+  padding-top: 0.5rem;
+}
+
+.aiBannerTypeOverviewSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: var(--sk-text-dim);
+  user-select: none;
+  list-style: none;
+}
+
+.aiBannerTypeOverviewSummary::-webkit-details-marker {
+  display: none;
+}
+
+.aiBannerTypeOverviewSummary::before {
+  content: '▸';
+  font-size: 0.6rem;
+  color: var(--sk-purple);
+  transition: transform 0.15s;
+}
+
+.aiBannerTypeOverview[open] > .aiBannerTypeOverviewSummary::before {
+  transform: rotate(90deg);
+}
+
+.aiBannerTypeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.aiBannerTypeRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: var(--sk-text-dim);
+  border: 1px solid transparent;
+}
+
+.aiBannerTypeRowActive {
+  background: var(--sk-purple-dim);
+  border-color: rgba(167, 139, 250, 0.2);
+}
+
+.aiBannerTypeRowIcon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  width: 2rem;
+  text-align: center;
+}
+
+.aiBannerTypeExample {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.aiBannerTypeRowCurrent {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--sk-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(110, 231, 183, 0.1);
+  color: var(--sk-accent);
+  white-space: nowrap;
+  align-self: center;
+}
+
 /* ── Tip (inline tooltip for progressive disclosure) ── */
 
 .tip {
