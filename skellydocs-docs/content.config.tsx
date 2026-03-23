@@ -20,9 +20,7 @@ const config: SkellyDocsConfig = {
       title: 'Example Feature',
       description: 'Describe what this feature does.',
       summary: <>Describe what this feature does in a sentence or two.</>,
-      issues: [
-        { label: 'Initial skellydocs feature set', url: 'https://github.com/freemocap/skellydocs/issues/2' },
-      ],
+      issues: [],
       docPath: 'intro',
     },
   ],

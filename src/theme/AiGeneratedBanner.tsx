@@ -135,17 +135,6 @@ export default function AiGeneratedBanner({
           </div>
         )}
 
-        {moreInfoUrl && (
-          <a
-            href={moreInfoUrl}
-            className={styles.aiBannerMoreInfo}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            More info about content generation types →
-          </a>
-        )}
-
         <details className={styles.aiBannerTypeOverview}>
           <summary className={styles.aiBannerTypeOverviewSummary}>
             About content generation types
@@ -178,6 +167,16 @@ export default function AiGeneratedBanner({
               </div>
             ))}
           </div>
+          {moreInfoUrl && (
+            <a
+              href={moreInfoUrl}
+              className={styles.aiBannerMoreInfo}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              More info about content generation types ↗
+            </a>
+          )}
         </details>
       </div>
     </details>

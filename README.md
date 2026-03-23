@@ -267,12 +267,14 @@ The `Tip` component supports two modes:
 
 The banner is collapsible (collapsed by default) and supports optional props:
 
-| Prop | Type | Description |
-|---|---|---|
-| `generationType` | `"ai-generated" \| "ai-human-curated" \| "human-sourced-ai" \| "human-generated"` | Changes the summary text and badge |
-| `generatedAt` | `string` | Date the content was generated |
-| `model` | `string` | AI model used |
-| `humanNotes` | `string` | Curator notes shown in an accented blockquote |
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `generationType` | `"ai-generated" \| "ai-transformatted" \| "human-generated"` | `"ai-generated"` | Controls the summary text, icon, and badge |
+| `humanCurated` | `boolean` | `false` | Adds a green "✓ curated" badge indicating human review |
+| `generatedAt` | `string` | — | Date the content was generated |
+| `model` | `string` | — | AI model used |
+| `humanNotes` | `string` | — | Curator notes shown in an accented blockquote |
+| `moreInfoUrl` | `string` | `"https://docs.freemocap.org/skellydocs/docs/ai-generated-banner"` | Link to generation type docs (set to `""` to hide) |
 
 ## CSS design tokens
 
@@ -347,10 +349,8 @@ The `skellydocs-docs/` directory should always be a **faithful representation of
 ```bash
 # 1. Stop any running dev server first (Ctrl+C)
 
-# 2. Delete the dogfood site
-rm -rf skellydocs-docs
-# PowerShell:  Remove-Item -Recurse -Force skellydocs-docs
-# cmd.exe:     rmdir /s /q skellydocs-docs
+# 2. Delete the dogfood site (cross-platform)
+npx rimraf skellydocs-docs
 
 # 3. Build the theme package (so the CLI uses your latest changes)
 npm run build
@@ -360,21 +360,18 @@ node dist/bin/create-skellydocs.js
 
 #    When prompted, use these values:
 #      Project name:  skellydocs
-#      GitHub repo:   freemocap/skellydocs
-#      Site URL:      https://docs.freemocap.org
-#      Base URL:      /skellydocs/
+#      GitHub repo:   https://github.com/freemocap/skellydocs
+#      Project URL:   https://docs.freemocap.org/skellydocs/
+#      Logo:          (leave blank for default)
 
-# 5. Clear any stale webpack caches
-rm -rf skellydocs-docs/.docusaurus skellydocs-docs/node_modules/.cache
-
-# 6. Re-install workspace links from the repo root
+# 5. Re-install workspace links from the repo root
 npm install
 
-# 7. Start the dev server
+# 6. Start the dev server
 npm start -w skellydocs-docs
 ```
 
-> **Important:** Always stop the dev server before deleting `skellydocs-docs/`. Running the CLI while a dev server is watching the directory can corrupt webpack's cache (`Cannot parse JSON: Unexpected end of JSON input`). If this happens, clear caches with step 5 above.
+> **Important:** Always stop the dev server before deleting `skellydocs-docs/`. Running the CLI while a dev server is watching the directory can corrupt webpack's cache (`Cannot parse JSON: Unexpected end of JSON input`). If this happens, clear caches: `npx rimraf skellydocs-docs/.docusaurus skellydocs-docs/node_modules/.cache`
 
 > **Important:** Any edits you want to see in the dogfood site should be made in the **templates** (`templates/` directory), not directly in `skellydocs-docs/`. The dogfood site exists to prove the templates work correctly.
 

@@ -22,13 +22,20 @@ const config: Config = {
     // webpack 5 enforces full file extensions on imports from ESM packages.
     // tsup/esbuild strips .js extensions in unbundled output, so we relax
     // that strictness here.
-    function disableFullySpecified() {
+    function skellydocsWebpackFixes() {
       return {
-        name: 'disable-fully-specified',
+        name: 'skellydocs-webpack-fixes',
         configureWebpack() {
           return {
+            // tsup/esbuild strips .js extensions in unbundled output;
+            // webpack 5 enforces them on ESM imports, so relax that.
             module: {
               rules: [{ test: /\.m?js$/, resolve: { fullySpecified: false } }],
+            },
+            // Prevent webpack from reading .docusaurus/ metadata files
+            // mid-write during regeneration (causes JSON parse errors on Windows).
+            watchOptions: {
+              ignored: ['**/.docusaurus/**'],
             },
           };
         },
@@ -43,12 +50,12 @@ const config: Config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.ts'),
           routeBasePath: 'docs',
-          
+          editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
         },
         blog: {
           showReadingTime: true,
           feedOptions: { type: ['rss', 'atom'], xslt: true },
-          
+          editUrl: 'https://github.com/freemocap/skellydocs/tree/main/skellydocs-docs/',
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -98,7 +105,7 @@ const config: Config = {
           title: 'More',
           items: [
             { label: 'Blog', to: '/blog' },
-            { label: 'Website', href: 'https://docs.freemocap.org' },
+            { label: 'Website', href: 'https://docs.freemocap.org/skellydocs/' },
           ],
         },
       ],
