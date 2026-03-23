@@ -276,6 +276,37 @@ The banner is collapsible (collapsed by default) and supports optional props:
 | `humanNotes` | `string` | — | Curator notes shown in an accented blockquote |
 | `moreInfoUrl` | `string` | `"https://docs.freemocap.org/skellydocs/docs/ai-generated-banner"` | Link to generation type docs (set to `""` to hide) |
 
+#### LinkedIssues component
+
+The `LinkedIssues` component renders a collapsible list of GitHub issues and PRs at the top of a doc page. Metadata (status, type, labels) is fetched from the GitHub API the first time the section is expanded, then cached in localStorage for 5 minutes.
+
+Place it near the top of the page, right after `<AiGeneratedBanner />`:
+
+```mdx
+import { AiGeneratedBanner, LinkedIssues } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
+<LinkedIssues items={[
+  { label: "Track progress on this feature", url: "https://github.com/freemocap/myproject/issues/123" },
+  { label: "Related PR", url: "https://github.com/freemocap/myproject/pull/456" },
+]} />
+
+# Page Title
+```
+
+Each item in the `items` array is a `LinkedIssue`:
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `label` | `string` | ✓ | Display text shown in the list |
+| `url` | `string` | ✓ | GitHub issue or PR URL |
+| `status` | `"open" \| "closed"` | — | Fetched automatically if omitted |
+| `type` | `"issue" \| "pr"` | — | Fetched automatically if omitted |
+| `labels` | `GitHubLabel[]` | — | Fetched automatically if omitted |
+
+Only `label` and `url` are required — everything else is enriched at runtime from the GitHub API.
+
 ## CSS design tokens
 
 The theme defines `--sk-*` CSS variables in `custom.css`. All component styles reference these tokens, so the look stays consistent across sites:
