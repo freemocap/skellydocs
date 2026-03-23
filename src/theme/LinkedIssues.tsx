@@ -14,13 +14,17 @@ type EnrichedIssue = LinkedIssue & {
  * Collapsible section that links each item to an issue or PR.
  * Fetches metadata from GitHub API to show type, status, and label badges.
  * Falls back to simple display if fetch fails.
+ *
+ * @param defaultOpen - Start the section expanded (default: false)
  */
 export default function LinkedIssues({
   items,
+  defaultOpen = false,
 }: {
   items: LinkedIssue[];
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [enriched, setEnriched] = useState<EnrichedIssue[]>(items);
 
   // Fetch metadata for items that don't already have it
