@@ -117,6 +117,11 @@ writeFile(
 );
 
 writeFile(
+  path.join(TARGET_DIR, "docs", "customizing-index-page.mdx"),
+  renderTemplate("docs/customizing-index-page.mdx.hbs"),
+);
+
+writeFile(
   path.join(TARGET_DIR, "blog", `${templateData.isoDate}_welcome.mdx`),
   renderTemplate("blog/init.mdx.hbs"),
 );

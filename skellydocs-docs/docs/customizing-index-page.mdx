@@ -1,0 +1,112 @@
+---
+sidebar_position: 2
+title: Customizing the Index Page
+---
+
+import { AiGeneratedBanner } from '@freemocap/skellydocs';
+
+<AiGeneratedBanner />
+
+# Customizing the Index Page
+
+The `IndexPage` component supports three levels of customization. Pick the level that fits your needs — each builds on the previous one.
+
+## Level 1 — Config only (simplest)
+
+Everything is driven by `content.config.tsx`. Custom CTA buttons, guarantees config, and `hideSections` are all optional fields:
+
+```tsx
+// src/pages/index.tsx
+import { IndexPage } from '@freemocap/skellydocs';
+import config from '../../content.config';
+
+export default function Home() {
+  return <IndexPage config={config} />;
+}
+```
+
+### Custom CTA buttons
+
+```tsx
+// content.config.tsx
+hero: {
+  // ...
+  ctaButtons: [
+    { label: 'Get Started', to: '/docs/intro', variant: 'primary' },
+    { label: 'View on GitHub', to: 'https://github.com/...', variant: 'secondary' },
+  ],
+},
+```
+
+### Hide sections
+
+```tsx
+// content.config.tsx
+const config: SkellyDocsConfig = {
+  // ...
+  hideSections: ['guarantees'], // hide any of: 'hero', 'features', 'guarantees'
+};
+```
+
+### Custom guarantees
+
+```tsx
+// content.config.tsx
+guaranteesConfig: {
+  title: (
+    <>
+      Every FreeMoCap docs site gets these{' '}
+      <span style={{ color: 'var(--sk-accent)' }}>guarantees</span>:
+    </>
+  ),
+  items: [
+    'Consistent dark-theme design across all sub-projects',
+    'Zero-config landing page with hero, features, and guarantees',
+  ],
+  issues: [], // optional LinkedIssue[] array
+},
+```
+
+## Level 2 — Compose from sub-components
+
+Import `HeroSection`, `FeaturesSection`, and `GuaranteesSection` individually. Reorder them, add your own sections between them, or drop any you don't need:
+
+```tsx
+import {
+  IndexPage, HeroSection, FeaturesSection, GuaranteesSection,
+} from '@freemocap/skellydocs';
+import config from '../../content.config';
+
+export default function Home() {
+  return (
+    <IndexPage config={config}>
+      <HeroSection config={config} />
+      <MyCustomCallout />
+      <FeaturesSection config={config} />
+      {/* GuaranteesSection omitted */}
+    </IndexPage>
+  );
+}
+```
+
+This is exactly what this dogfood site does — check `src/pages/index.tsx` to see it in action.
+
+## Level 3 — Fully custom page
+
+Pass any JSX as children to `IndexPage` to get the `<Layout>` wrapper and CSS tokens without any default sections:
+
+```tsx
+import { IndexPage } from '@freemocap/skellydocs';
+import config from '../../content.config';
+
+export default function Home() {
+  return (
+    <IndexPage config={config}>
+      <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+        <h1>Completely custom landing page</h1>
+        <p>Still gets the Layout wrapper, navbar, footer, and --sk-* tokens.</p>
+      </div>
+    </IndexPage>
+  );
+}
+```
