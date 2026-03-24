@@ -5,7 +5,7 @@ const config: SkellyDocsConfig = {
     title: 'skellydocs',
     accentedSuffix: 'skellydocs',
     subtitle: 'Part of the FreeMoCap ecosystem',
-    tagline: 'Add your project tagline here',
+    tagline: 'Shared Docusaurus theme, components, and CLI for FreeMoCap docs sites',
     logoSrc: '/skellydocs/img/logo.svg',
     parentProject: {
       name: 'FreeMoCap',
@@ -13,26 +13,73 @@ const config: SkellyDocsConfig = {
     },
     ctaButtons: [
       { label: 'Get Started', to: '/docs/intro', variant: 'primary' },
-      { label: 'Learn More', to: '/docs/intro', variant: 'secondary' },
+      { label: 'View on GitHub', to: 'https://github.com/freemocap/skellydocs', variant: 'secondary' },
     ],
   },
 
   features: [
     {
-      id: 'example-feature',
-      icon: '🚀',
-      title: 'Example Feature',
-      description: 'Describe what this feature does.',
-      summary: <>Describe what this feature does in a sentence or two.</>,
+      id: 'theme-components',
+      icon: '🧩',
+      title: 'Theme Components',
+      description: 'Pre-built React components shared across all FreeMoCap docs sites.',
+      summary: (
+        <>
+          IndexPage, RoadmapPage, Tip tooltips, AiGeneratedBanner, LinkedIssues,
+          and more — all composable and configurable.
+        </>
+      ),
+      issues: [],
+      docPath: 'intro',
+    },
+    {
+      id: 'cli-scaffolder',
+      icon: '⚡',
+      title: 'CLI Scaffolder',
+      description: 'One command to create a fully wired docs site.',
+      summary: (
+        <>
+          Run <code>npx @freemocap/skellydocs init</code> to scaffold a complete
+          Docusaurus site with theme, config, and example content.
+        </>
+      ),
+      issues: [],
+      docPath: 'intro',
+    },
+    {
+      id: 'design-tokens',
+      icon: '🎨',
+      title: 'CSS Design Tokens',
+      description: 'Consistent theming via --sk-* CSS custom properties.',
+      summary: (
+        <>
+          Override <code>--sk-accent</code> to give each project its own color
+          identity while keeping a consistent dark-theme look.
+        </>
+      ),
       issues: [],
       docPath: 'intro',
     },
   ],
 
-  guarantees: [
-    'Add your project guarantees here',
-  ],
+  guaranteesConfig: {
+    title: (
+      <>
+        Every FreeMoCap docs site gets these{' '}
+        <span style={{ color: 'var(--sk-accent)' }}>guarantees</span>:
+      </>
+    ),
+    items: [
+      'Consistent dark-theme design across all sub-projects',
+      'Zero-config landing page with hero, features, and guarantees',
+      'Live GitHub roadmap with filtering, sorting, and caching',
+      'Fully composable — use the whole page or pick individual sections',
+    ],
+    issues: [],
+  },
 
+  // Legacy fields (kept for backwards compatibility; guaranteesConfig takes precedence)
+  guarantees: [],
   guaranteeIssues: [],
 };
 
