@@ -4,15 +4,19 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import Layout from "@theme/Layout";
 import LinkedIssues from "./LinkedIssues.js";
 import styles from "../css/theme.module.css";
-import type { SkellyDocsConfig } from "../types.js";
+import type { CtaButton, SkellyDocsConfig } from "../types.js";
 
-function HeroSection({
+export function HeroSection({
   config,
 }: {
   config: SkellyDocsConfig;
 }) {
   const { hero } = config;
   const logoUrl = useBaseUrl(hero.logoSrc);
+  const buttons: CtaButton[] = hero.ctaButtons ?? [
+    { label: "Get Started", to: "/docs/intro", variant: "primary" },
+    { label: "Learn More", to: "/docs/intro", variant: "secondary" },
+  ];
   return (
     <div className={styles.hero}>
       <div className={styles.heroGlow} />
@@ -41,19 +45,25 @@ function HeroSection({
         </p>
         <p className={styles.heroTagline}>{hero.tagline}</p>
         <div className={styles.heroCtas}>
-          <Link className={styles.ctaPrimary} to="/docs/intro">
-            Get Started
-          </Link>
-          <Link className={styles.ctaSecondary} to="/docs/intro">
-            Learn More
-          </Link>
+          {buttons.map((btn, i) => {
+            const variant = btn.variant ?? (i === 0 ? "primary" : "secondary");
+            return (
+              <Link
+                key={i}
+                className={variant === "primary" ? styles.ctaPrimary : styles.ctaSecondary}
+                to={btn.to}
+              >
+                {btn.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-function FeaturesSection({
+export function FeaturesSection({
   config,
 }: {
   config: SkellyDocsConfig;
@@ -78,28 +88,37 @@ function FeaturesSection({
   );
 }
 
-function GuaranteesSection({
+export function GuaranteesSection({
   config,
 }: {
   config: SkellyDocsConfig;
 }) {
+  const gConfig = config.guaranteesConfig;
+  const title = gConfig?.title ?? (
+    <>
+      {config.hero.title} is carefully designed to{" "}
+      <span className={styles.accent}>guarantee</span>:
+    </>
+  );
+  const items = gConfig?.items ?? config.guarantees;
+  const issues = gConfig?.issues ?? config.guaranteeIssues;
+
   return (
     <div className={styles.guarantees}>
       <h2 className={styles.guaranteesTitle}>
-        {config.hero.title} is carefully designed to{" "}
-        <span className={styles.accent}>guarantee</span>:
+        {title}
       </h2>
       <div className={styles.guaranteesGrid}>
-        {config.guarantees.map((g, i) => (
+        {items.map((g, i) => (
           <div key={i} className={styles.guaranteeItem}>
             <span className={styles.guaranteeCheck}>✓</span>
             <span dangerouslySetInnerHTML={{ __html: g }} />
           </div>
         ))}
       </div>
-      {config.guaranteeIssues.length > 0 && (
+      {issues.length > 0 && (
         <div className={styles.guaranteesRoadmap}>
-          <LinkedIssues items={config.guaranteeIssues} />
+          <LinkedIssues items={issues} />
         </div>
       )}
     </div>
@@ -107,23 +126,34 @@ function GuaranteesSection({
 }
 
 /**
- * Full landing page component. Consumed by each repo's `src/pages/index.tsx`
- * as a one-liner wrapper.
+ * Full landing page component. Consumed by each repo's `src/pages/index.tsx`.
+ *
+ * Three levels of customization:
+ * 1. Config fields: ctaButtons, guaranteesConfig, hideSections
+ * 2. Children: pass children to replace the default section layout
+ * 3. Compose from parts: import HeroSection, FeaturesSection, GuaranteesSection directly
  */
 export default function IndexPage({
   config,
+  children,
 }: {
   config: SkellyDocsConfig;
+  children?: ReactNode;
 }): ReactNode {
+  const hidden = new Set(config.hideSections ?? []);
   return (
     <Layout
       title="Home"
       description={config.hero.tagline}
     >
       <main className={styles.main}>
-        <HeroSection config={config} />
-        <FeaturesSection config={config} />
-        <GuaranteesSection config={config} />
+        {children ?? (
+          <>
+            {!hidden.has("hero") && <HeroSection config={config} />}
+            {!hidden.has("features") && <FeaturesSection config={config} />}
+            {!hidden.has("guarantees") && <GuaranteesSection config={config} />}
+          </>
+        )}
       </main>
     </Layout>
   );

@@ -33,6 +33,7 @@
     "dev": "tsup --watch",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
+    "rebuild-dogfood": "npm run build && node scripts/rebuild-dogfood.mjs && npm install",
     "release": "release-it"
   },
   "dependencies": {

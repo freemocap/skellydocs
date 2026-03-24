@@ -11,6 +11,10 @@ const config: SkellyDocsConfig = {
       name: 'FreeMoCap',
       url: 'https://freemocap.org',
     },
+    ctaButtons: [
+      { label: 'Get Started', to: '/docs/intro', variant: 'primary' },
+      { label: 'Learn More', to: '/docs/intro', variant: 'secondary' },
+    ],
   },
 
   features: [

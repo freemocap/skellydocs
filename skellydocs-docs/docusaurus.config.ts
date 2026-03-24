@@ -6,7 +6,7 @@ const config: Config = {
   tagline: 'Documentation for skellydocs',
   favicon: 'img/favicon.ico',
 
-  url: 'https://docs.freemocap.org',
+  url: 'https://freemocap.github.io',
   baseUrl: '/skellydocs/',
 
   organizationName: 'freemocap',
@@ -105,7 +105,7 @@ const config: Config = {
           title: 'More',
           items: [
             { label: 'Blog', to: '/blog' },
-            { label: 'Website', href: 'https://docs.freemocap.org/skellydocs/' },
+            { label: 'Website', href: 'https://freemocap.github.io/skellydocs' },
           ],
         },
       ],

@@ -375,36 +375,21 @@ npm run typecheck   # Type check
 
 ### Resetting the dogfood site
 
-The `skellydocs-docs/` directory should always be a **faithful representation of CLI output**. If you need to verify that the CLI produces a working site, or if the dogfood site has drifted from the templates:
+The `skellydocs-docs/` directory should always be a **faithful representation of CLI output**. Never edit it directly — make changes in the **templates** (`templates/` directory) instead.
+
+To rebuild the dogfood site from templates:
 
 ```bash
-# 1. Stop any running dev server first (Ctrl+C)
+# Stop any running dev server first (Ctrl+C), then:
+npm run rebuild-dogfood
 
-# 2. Delete the dogfood site (cross-platform)
-npx rimraf skellydocs-docs
-
-# 3. Build the theme package (so the CLI uses your latest changes)
-npm run build
-
-# 4. Scaffold a fresh dogfood site using the CLI
-node dist/bin/create-skellydocs.js
-
-#    When prompted, use these values:
-#      Project name:  skellydocs
-#      GitHub repo:   https://github.com/freemocap/skellydocs
-#      Project URL:   https://docs.freemocap.org/skellydocs/
-#      Logo:          (leave blank for default)
-
-# 5. Re-install workspace links from the repo root
-npm install
-
-# 6. Start the dev server
+# Start the dev server
 npm start -w skellydocs-docs
 ```
 
-> **Important:** Always stop the dev server before deleting `skellydocs-docs/`. Running the CLI while a dev server is watching the directory can corrupt webpack's cache (`Cannot parse JSON: Unexpected end of JSON input`). If this happens, clear caches: `npx rimraf skellydocs-docs/.docusaurus skellydocs-docs/node_modules/.cache`
+This runs `scripts/rebuild-dogfood.mjs`, which deletes `skellydocs-docs/`, rebuilds the theme package, regenerates the site from templates, and re-installs workspace links — all in one step.
 
-> **Important:** Any edits you want to see in the dogfood site should be made in the **templates** (`templates/` directory), not directly in `skellydocs-docs/`. The dogfood site exists to prove the templates work correctly.
+> **Important:** Always stop the dev server before rebuilding. Running while a dev server is watching can corrupt webpack's cache. If this happens, clear caches: `npx rimraf skellydocs-docs/.docusaurus skellydocs-docs/node_modules/.cache`
 
 ## Updating an existing docs site
 

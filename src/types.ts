@@ -43,6 +43,14 @@ export type LinkedIssue = {
   labels?: GitHubLabel[];
 };
 
+// ── CTA button (used by hero section) ──
+
+export type CtaButton = {
+  label: string;
+  to: string;
+  variant?: "primary" | "secondary";
+};
+
 // ── Core feature (used by index page cards and doc headers) ──
 
 export type CoreFeature = {
@@ -53,6 +61,14 @@ export type CoreFeature = {
   summary: ReactNode;
   issues: LinkedIssue[];
   docPath: string;
+};
+
+// ── Guarantees config (optional override for guarantees section) ──
+
+export type GuaranteesConfig = {
+  title?: ReactNode;
+  items: string[];
+  issues?: LinkedIssue[];
 };
 
 // ── Content config (provided by each consuming repo) ──
@@ -67,6 +83,7 @@ export type HeroConfig = {
     name: string;
     url: string;
   };
+  ctaButtons?: CtaButton[];
 };
 
 export type SkellyDocsConfig = {
@@ -74,4 +91,6 @@ export type SkellyDocsConfig = {
   features: CoreFeature[];
   guarantees: string[];
   guaranteeIssues: LinkedIssue[];
+  guaranteesConfig?: GuaranteesConfig;
+  hideSections?: Array<"hero" | "features" | "guarantees">;
 };
