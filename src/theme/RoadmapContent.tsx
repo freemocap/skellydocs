@@ -195,11 +195,14 @@ export default function RoadmapContent({
   repo,
   roadmapLabel = "roadmap",
   pinnedIssues = [],
+  projectBoardUrl,
 }: {
   repo: string;
   roadmapLabel?: string;
   /** Issue/PR URLs to always include, even without the roadmap label */
   pinnedIssues?: string[];
+  /** URL to an external project board (GitHub Projects, Linear, etc.) */
+  projectBoardUrl?: string;
 }) {
   const labelCacheKey = `sk-roadmap-${repo}`;
   const pinnedCacheKey = `sk-roadmap-pinned-${repo}`;
@@ -296,6 +299,16 @@ export default function RoadmapContent({
           What we're working on and what's coming next. Click any item to see
           the full discussion and progress.
         </p>
+        {projectBoardUrl && (
+          <a
+            href={projectBoardUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.roadmapBoardLink}
+          >
+            View full project board →
+          </a>
+        )}
       </div>
 
       {error && (

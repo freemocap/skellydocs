@@ -78,9 +78,10 @@ const config: SkellyDocsConfig = {
     issues: [],
   },
 
-  // Legacy fields (kept for backwards compatibility; guaranteesConfig takes precedence)
-  guarantees: [],
-  guaranteeIssues: [],
+{{#if projectBoardUrl}}
+
+  projectBoardUrl: '{{{projectBoardUrl}}}',
+{{/if}}
 };
 
 export default config;

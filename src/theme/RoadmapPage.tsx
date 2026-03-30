@@ -12,12 +12,15 @@ export default function RoadmapPage({
   roadmapLabel = "roadmap",
   pinnedIssues = [],
   title = "Roadmap",
+  projectBoardUrl,
 }: {
   repo: string;
   roadmapLabel?: string;
   /** Issue/PR URLs to always include, even without the roadmap label */
   pinnedIssues?: string[];
   title?: string;
+  /** URL to an external project board (GitHub Projects, Linear, etc.) */
+  projectBoardUrl?: string;
 }): ReactNode {
   return (
     <Layout
@@ -25,7 +28,7 @@ export default function RoadmapPage({
       description={`${title} — what we're working on and what's next`}
     >
       <main className={styles.main}>
-        <RoadmapContent repo={repo} roadmapLabel={roadmapLabel} pinnedIssues={pinnedIssues} />
+        <RoadmapContent repo={repo} roadmapLabel={roadmapLabel} pinnedIssues={pinnedIssues} projectBoardUrl={projectBoardUrl} />
       </main>
     </Layout>
   );

@@ -57,6 +57,7 @@ interface UserInput {
   projectName: string;
   repoUrl: string;
   projectUrl: string;
+  projectBoardUrl: string;
   logoPath: string;
 }
 
@@ -92,6 +93,15 @@ async function promptUser(): Promise<UserInput> {
     PROMPTS_CANCEL,
   );
 
+  const { projectBoardUrl } = await prompts(
+    {
+      type: "text",
+      name: "projectBoardUrl",
+      message: "Project board URL (GitHub Projects, Linear, etc. — leave blank to skip)",
+    },
+    PROMPTS_CANCEL,
+  );
+
   const { logoPath } = await prompts(
     {
       type: "text",
@@ -117,6 +127,7 @@ async function promptUser(): Promise<UserInput> {
     projectName: (projectName as string).trim(),
     repoUrl: normalizedRepoUrl,
     projectUrl: (projectUrl as string).trim(),
+    projectBoardUrl: (projectBoardUrl as string).trim(),
     logoPath: (logoPath as string).trim(),
   };
 }
@@ -160,7 +171,7 @@ async function main(): Promise<void> {
 async function runInit(): Promise<void> {
   console.log("\n🦴 skellydocs — scaffold a new docs site\n");
 
-  const { projectName, repoUrl, projectUrl, logoPath } = await promptUser();
+  const { projectName, repoUrl, projectUrl, projectBoardUrl, logoPath } = await promptUser();
 
   const orgName = repoUrl ? extractOrgName(repoUrl) : "";
   const repo = orgName ? `${orgName}/${projectName}` : projectName;
@@ -191,6 +202,7 @@ async function runInit(): Promise<void> {
     repo,
     repoUrl,
     projectUrl,
+    projectBoardUrl,
     editUrl,
     siteUrl,
     baseUrl: `/${projectName}/`,
@@ -262,7 +274,7 @@ async function runInit(): Promise<void> {
 
   writeFile(
     path.join(pagesDir, "roadmap.tsx"),
-    `import { RoadmapPage, collectLinkedUrls } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return <RoadmapPage repo={REPO} pinnedIssues={collectLinkedUrls(config)} />;\n}\n`,
+    `import { RoadmapPage, collectLinkedUrls } from '@freemocap/skellydocs';\nimport config from '../../content.config';\n\nconst REPO = '${repo}';\n\nexport default function Roadmap() {\n  return (\n    <RoadmapPage\n      repo={REPO}\n      pinnedIssues={collectLinkedUrls(config)}\n      projectBoardUrl={config.projectBoardUrl}\n    />\n  );\n}\n`,
   );
 
   // --- Static assets ---
@@ -296,6 +308,7 @@ async function runInit(): Promise<void> {
     Tagline     → content.config.tsx → hero.tagline
     Subtitle    → content.config.tsx → hero.subtitle
     Features    → content.config.tsx → features[]
+    Board link  → content.config.tsx → projectBoardUrl
     Code link   → docusaurus.config.ts → themeConfig.navbar.items
 
   Linking issues to feature cards:

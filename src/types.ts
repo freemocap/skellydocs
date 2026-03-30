@@ -93,4 +93,5 @@ export type SkellyDocsConfig = {
   guaranteeIssues: LinkedIssue[];
   guaranteesConfig?: GuaranteesConfig;
   hideSections?: Array<"hero" | "features" | "guarantees">;
+  projectBoardUrl?: string;
 };
